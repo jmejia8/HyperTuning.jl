@@ -1,0 +1,50 @@
+import Random
+abstract type AbstractScenario end
+abstract type AbstractPruner end
+
+struct MedianPruner <: AbstractPruner
+    start_after::Int
+end
+
+function MedianPruner(;start_after = 11)
+    MedianPruner(start_after)
+end
+
+
+struct Budget
+    max_trials::Int
+    max_time::Float32
+end
+
+mutable struct Scenario <: AbstractScenario
+    parameters::MixedSpace
+    sampler#::AbstractSampler
+    pruner::AbstractPruner
+    instances::AbstractVector
+    budget::Budget
+    best_parameter::Dict
+end
+
+#=
+function Budget(;max_trials = 30, max_time = 30.0)
+    Budget(max_trials, max_time)
+end
+=#
+
+default_sampler() = AtRandom(Random.default_rng())
+default_pruner() = MedianPruner()
+
+function Scenario(;
+        parameters = MixedSpace(),
+        sampler = default_sampler(),
+        pruner = default_pruner(),
+        instances = [1],
+        max_trials = 30,
+        max_time = Inf
+    )
+
+    budget = Budget(max_trials, max_time)
+    Scenario(parameters, sampler, pruner, instances, budget, Dict())
+end
+
+

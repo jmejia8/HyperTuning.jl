@@ -1,0 +1,16 @@
+name = "Parami"
+uuid = "ddfa78db-9111-4329-a6bd-d4ed85ceb229"
+authors = ["Jesus Mejia <jesusmejded@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+SearchSpaces = "eb7571c6-2196-4f03-99b8-52a5a35b3163"
+
+[extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Aqua", "Test"]
