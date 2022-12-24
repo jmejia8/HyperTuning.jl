@@ -54,11 +54,20 @@ using Parami
             @suggest x in scenario
             @suggest y in scenario
             @suggest N in scenario
-            x^2 + prod(y[1:N])
+
+            fx = x^2 + prod(y[1:N])
+            @show fx
+            fx
         end
 
-        scenario = Scenario(pruner = MedianPruner)
-        result = optimize(f, scenario)
+        params = parameters(:x => Bounds(0.0, 10),
+                            :y => Permutations(10),
+                            :N => 1:10
+                           )
+
+        scenario = Scenario(;parameters = params)
+
+        Parami.optimize!(f, scenario)
     end
 
 end
