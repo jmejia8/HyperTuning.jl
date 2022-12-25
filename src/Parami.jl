@@ -7,6 +7,7 @@ import SearchSpaces: AbstractSampler, AbstractSearchSpace
 
 export @suggest, Scenario, parameters, MedianPruner
 
+include("status.jl")
 include("scenario.jl")
 include("parameters.jl")
 include("suggest.jl")

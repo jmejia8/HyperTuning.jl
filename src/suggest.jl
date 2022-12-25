@@ -4,30 +4,31 @@ end
 
 
 function _suggest(var::Symbol, ::Nothing, scenario::Scenario)
+    # this function is called when the parameters are defined a priori
     if var in keys(scenario.parameters.domain)
         searchspace = get_search_space(scenario, var)
-        return SearchSpaces.value(SearchSpaces.Sampler(scenario.sampler, searchspace))
+        return sample(var, searchspace, scenario)
     end
 
     throw(ErrorException("$var not defined in scenario."))
 end
 
-
-function _register!(var::Symbol, searchspace, scenario::Scenario)
-    scenario.parameters.domain[var] = searchspace
-end
-
 function _suggest(var::Symbol,searchspace::AbstractSearchSpace,scenario::Scenario)
+    # this function is called when the parameters are defined on f call
 
     # TODO improve performance finding var in keys
     if var in keys(scenario.parameters.domain)
         # TODO compare with saved search space
         searchspace = get_search_space(scenario, var)
-        return SearchSpaces.value(SearchSpaces.Sampler(scenario.sampler, searchspace))
+        return sample(var, searchspace, scenario)
     end
 
     _register!(var, searchspace, scenario)
     SearchSpaces.value(SearchSpaces.Sampler(scenario.sampler, searchspace))
+end
+
+function _register!(var::Symbol, searchspace, scenario::Scenario)
+    scenario.parameters.domain[var] = searchspace
 end
 
 function _pre_proc(ex::Expr)

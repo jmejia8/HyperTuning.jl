@@ -6,9 +6,9 @@ using Parami
 
     @testset "Scenario" begin
         parms = parameters(
-                           :x => Bounds(0.0, 10),
-                           :y => Permutations(10),
-                           :N => 1:10
+                           :x => range(-3, 3),
+                           :y => Permutations(4),
+                           :N => 1:5
                           )
 
         scenario = Scenario(parameters = parms,
@@ -20,6 +20,9 @@ using Parami
                            ) 
 
         @test scenario isa Scenario
+
+        # @show cardinality(parms)
+        # Parami.suggest_budget(scenario)
     end
 
     @testset "Suggester" begin
@@ -41,10 +44,11 @@ using Parami
             x^2 + prod(y[1:N])
         end
 
-        params = parameters(:x => Bounds(0.0, 10),
+        params = parameters(:x => Bounds(0, 10),
                             :y => Permutations(10),
                             :N => 1:10
                            )
+
         scenario = Scenario(;parameters = params)
         @test f(scenario) isa Real
     end
@@ -55,17 +59,24 @@ using Parami
             @suggest y in scenario
             @suggest N in scenario
 
-            fx = x^2 + prod(y[1:N])
-            @show fx
+            I = get_instance(scenario)
+
+            # handling multiple instances
+            if I == 1
+                fx = x^2 + prod(y[1:N])
+            else
+                fx = I*sin(x)^2 + prod(y[1:N])
+            end
+            
             fx
         end
 
-        params = parameters(:x => Bounds(0.0, 10),
+        params = parameters(:x => -10:10,
                             :y => Permutations(10),
                             :N => 1:10
                            )
 
-        scenario = Scenario(;parameters = params)
+        scenario = Scenario(;parameters = params, instances = 1:5)
 
         Parami.optimize!(f, scenario)
     end
