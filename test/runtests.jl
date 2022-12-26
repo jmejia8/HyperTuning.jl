@@ -22,22 +22,13 @@ using Parami
         @test scenario isa Scenario
     end
 
-    @testset "Suggester" begin
-        # empty scenario
-        scenario = Scenario(max_trials = 10)
-
-        @suggest x in scenario(Categorical([:red, :green, :blue]))
-        @test x in [:red, :green, :blue]
-        @suggest x in scenario
-        @test x in [:red, :green, :blue]
-
-    end
 
     @testset "Objective" begin
-        function f(scenario)
-            @suggest x in scenario
-            @suggest y in scenario
-            @suggest N in scenario
+        function f(trial)
+            @suggest x in trial
+            @suggest y in trial
+            @suggest N in trial
+
             x^2 + prod(y[1:N])
         end
 
@@ -46,28 +37,32 @@ using Parami
                             :N => 1:10
                            )
         scenario = Scenario(;parameters = params)
-        @test f(scenario) isa Real
+        # @test f(scenario) isa Real
     end
 
     @testset "Optimize" begin
-        function f(scenario)
-            @suggest x in scenario
-            @suggest y in scenario
-            @suggest N in scenario
+        function f(trial)
+            @suggest x in trial
+            @suggest y in trial
+            @suggest N in trial
 
-            fx = x^2 + prod(y[1:N])
-            @show fx
-            fx
+            my_instance = get_instance(trial)
+            if my_instance == 1
+                return x^2 + prod(y[1:N])
+            end
+            
+            my_instance*sin(x)^2 + sum(y[1:N])
         end
 
-        params = parameters(:x => Bounds(0.0, 10),
-                            :y => Permutations(10),
-                            :N => 1:10
+        params = parameters(:x => range(-10, 10, length = 5),
+                            :y => Permutations(4),
+                            :N => 1:4
                            )
 
-        scenario = Scenario(;parameters = params)
+        scenario = Scenario(;parameters = params, instances  = 1:3)
 
         Parami.optimize!(f, scenario)
+        @test scenario.best_trial.fval isa Real
     end
 
 end

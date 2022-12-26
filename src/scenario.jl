@@ -22,7 +22,8 @@ mutable struct Scenario <: AbstractScenario
     pruner::AbstractPruner
     instances::AbstractVector
     budget::Budget
-    best_parameter::Dict
+    best_trial::Trial
+    status::StatusParami
 end
 
 #=
@@ -42,9 +43,30 @@ function Scenario(;
         max_trials = 30,
         max_time = Inf
     )
-
+    _sampler = SearchSpaces.Sampler(sampler, parameters)
     budget = Budget(max_trials, max_time)
-    Scenario(parameters, sampler, pruner, instances, budget, Dict())
+
+    Scenario(parameters,
+             _sampler,
+             pruner,
+             instances,
+             budget,
+             Trial(),
+             StatusParami()
+            )
 end
 
+
+function save_trials!(trials::Vector{<:Trial}, scenario::Scenario)
+    status = scenario.status
+    append!(status.history, trials)
+    best_trial = argmin(t -> t.fval, trials)
+
+    # TODO consider multi-objective
+    if best_trial.fval < scenario.best_trial.fval
+        scenario.best_trial = best_trial
+    end
+
+    status.f_evals += length(trials)
+end
 

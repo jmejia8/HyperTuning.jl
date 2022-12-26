@@ -2,9 +2,29 @@ function get_available_samples(scenario)
     1
 end
 
+function evaluate_trial(f, trial::Trial)
+    fval = f(trial)
+    if isnothing(fval)
+        fval = Inf
+        trial.prunded = true
+    end
+
+    trial.fval = fval
+    trial.fval
+end
+
+
 function evaluate_objective(f::Function, scenario::Scenario)
+    sampler = scenario.sampler
+    searchspace = scenario.parameters
+
+    trials = sample(scenario) # sampler(searchspace)
+
     # TODO parallelize this part
-    [f(scenario) for _ in get_available_samples(scenario)]
+    fvals = [evaluate_trial(f, trial) for trial in trials]
+    save_trials!(trials, scenario)
+
+    fvals
 end
 
 function before_evaluation!(scenario::Scenario)
@@ -13,6 +33,7 @@ end
 
 function after_evaluation!(scenario::Scenario, f_values)
     report_values_to_sampler!(scenario, f_values)
+
     scenario
 end
 

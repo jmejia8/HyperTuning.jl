@@ -1,3 +1,8 @@
+function _suggest(var::Symbol, ::Nothing, trial::Trial)
+    return trial.values[var]
+end
+
+#=
 function get_search_space(scenario::Scenario, key)
     scenario.parameters.domain[key]
 end
@@ -29,11 +34,14 @@ function _suggest(var::Symbol,searchspace::AbstractSearchSpace,scenario::Scenari
     _register!(var, searchspace, scenario)
     SearchSpaces.value(SearchSpaces.Sampler(scenario.sampler, searchspace))
 end
+=#
 
 function _pre_proc(ex::Expr)
+    #=
     if length(ex.args) == 2 # scenario(searchspace)
         return ex.args[1], ex.args[2]
     end
+    =#
     throw(ArgumentError)
 end
 
