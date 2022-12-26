@@ -32,7 +32,7 @@ function Budget(;max_trials = 30, max_time = 30.0)
 end
 =#
 
-default_sampler() = AtRandom(Random.default_rng())
+default_sampler() = AtRandom#(Random.default_rng())
 default_pruner() = MedianPruner()
 
 function Scenario(;
@@ -43,7 +43,7 @@ function Scenario(;
         max_trials = 30,
         max_time = Inf
     )
-    _sampler = SearchSpaces.Sampler(sampler, parameters)
+    _sampler = sampler(parameters)
     budget = Budget(max_trials, max_time)
 
     Scenario(parameters,

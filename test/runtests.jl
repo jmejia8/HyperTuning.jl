@@ -59,10 +59,19 @@ using Parami
                             :N => 1:4
                            )
 
-        scenario = Scenario(;parameters = params, instances  = 1:3)
+        scenario = Scenario(;parameters = params,
+                            instances  = 1:3,
+                            sampler = Grid,
+                            max_trials = Int(cardinality(params)*3),
+                           )
 
         Parami.optimize!(f, scenario)
-        @test scenario.best_trial.fval isa Real
+        display(Parami.trial_performance.(scenario.status.history))
+        println("\n---")
+
+        println(scenario.best_trial.trials[1])
+        @show Parami.trial_performance(scenario.best_trial)
+        # @test scenario.best_trial.fval isa Real
     end
 
 end

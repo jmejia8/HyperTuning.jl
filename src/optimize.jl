@@ -24,7 +24,8 @@ function evaluate_objective(f::Function, scenario::Scenario)
 
     # TODO parallelize this part
     fvals = [evaluate_trial(f, trial) for trial in trials]
-    @time save_trials!(trials, scenario)
+    scenario.status.f_evals += length(fvals)
+    save_trials!(trials, scenario)
 
     fvals
 end
