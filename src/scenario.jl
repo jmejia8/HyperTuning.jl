@@ -74,7 +74,7 @@ function Scenario(;
              pruner,
              instances,
              budget,
-             GroupedTrial(Trial[], 0),
+             GroupedTrial(Trial[]),
              StatusParami(),
              verbose,
             )
