@@ -14,6 +14,7 @@ include("sample.jl")
 include("parameters.jl")
 include("suggest.jl")
 include("optimize.jl")
+include("stop.jl")
 
 
 

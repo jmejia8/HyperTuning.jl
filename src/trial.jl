@@ -68,6 +68,7 @@ end
 Base.@kwdef mutable struct StatusParami
     history::Vector{GroupedTrial} = GroupedTrial[]
     f_evals::Int = 0
+    n_trials::Int = 0
     start_time::Float64 = time()
 end
 

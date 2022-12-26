@@ -7,11 +7,11 @@ function sample(scenario::Scenario)
     
     searchspace = scenario.parameters
  
-    value_id = 0
     counter = 0
     for values in scenario.sampler
         # TODO improve instance scheduler
-        value_id += 1
+        scenario.status.n_trials += 1
+        value_id = scenario.status.n_trials
         for (instance_id, instance) in enumerate(scenario.instances)
             seed = 1
             fval =  Inf
@@ -19,11 +19,10 @@ function sample(scenario::Scenario)
             counter += 1
         end
 
-        if scenario.status.f_evals + counter >= scenario.budget.max_trials
+        if budget_exceeded(scenario)
             break
         end
-        
-        
     end
+
     trials
 end

@@ -14,6 +14,7 @@ end
 struct Budget
     max_trials::Int
     max_time::Float32
+    max_evals::Int
 end
 
 mutable struct Scenario <: AbstractScenario
@@ -27,26 +28,46 @@ mutable struct Scenario <: AbstractScenario
     verbose::Bool
 end
 
-#=
-function Budget(;max_trials = 30, max_time = 30.0)
-    Budget(max_trials, max_time)
-end
-=#
 
 default_sampler() = AtRandom#(Random.default_rng())
 default_pruner() = MedianPruner()
 
+function suggest_budget(max_trials, max_evals, max_time, parameters, instances, sampler)
+
+    max_time = max_time isa Symbol ? Inf : max_time
+
+    if max_trials === :auto
+        card = n_parameters = SearchSpaces.getdim(parameters)
+        try 
+            card = cardinality(parameters) |> Int
+        catch InexactError
+            card = 20n_parameters
+        end
+
+        max_trials = min(card, 1000)
+    end
+
+    if max_evals ===  :auto
+        max_evals = max_trials*length(instances)
+    end
+
+    Budget(max_trials, max_time, max_evals)
+end
+
+
 function Scenario(;
         parameters = MixedSpace(),
-        sampler = default_sampler(),
-        pruner = default_pruner(),
-        instances = [1],
-        max_trials = 30,
-        max_time = Inf,
-        verbose = false
+        sampler    = default_sampler(),
+        pruner     = default_pruner(),
+        instances  = [1],
+        max_trials = :auto,
+        max_evals  = :auto,
+        max_time   = :auto,
+        verbose    = false
     )
     _sampler = sampler(parameters)
-    budget = Budget(max_trials, max_time)
+
+    budget = suggest_budget(max_trials, max_evals, max_time, parameters, instances, _sampler)
 
     Scenario(parameters,
              _sampler,
