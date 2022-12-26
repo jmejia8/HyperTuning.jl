@@ -19,10 +19,12 @@ function evaluate_objective(f::Function, scenario::Scenario)
     searchspace = scenario.parameters
 
     trials = sample(scenario) # sampler(searchspace)
+    # TODO improve instances scheduler
+    # instances = scenario.instances
 
     # TODO parallelize this part
     fvals = [evaluate_trial(f, trial) for trial in trials]
-    save_trials!(trials, scenario)
+    @time save_trials!(trials, scenario)
 
     fvals
 end

@@ -22,7 +22,7 @@ mutable struct Scenario <: AbstractScenario
     pruner::AbstractPruner
     instances::AbstractVector
     budget::Budget
-    best_trial::Trial
+    best_trial::GroupedTrial
     status::StatusParami
 end
 
@@ -51,22 +51,33 @@ function Scenario(;
              pruner,
              instances,
              budget,
-             Trial(),
+             GroupedTrial(Trial[], 0),
              StatusParami()
             )
 end
 
 
-function save_trials!(trials::Vector{<:Trial}, scenario::Scenario)
+function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
     status = scenario.status
+
+    trials = group_trials_by_instance(_trials, scenario.instances)
+
     append!(status.history, trials)
-    best_trial = argmin(t -> t.fval, trials)
+
+    update_best_trial!(scenario, trials)
+
+end
+
+function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
+    @assert !isempty(trials)
+
+    best_trial = argmin(trial_performance, trials)
 
     # TODO consider multi-objective
-    if best_trial.fval < scenario.best_trial.fval
+    if trial_performance(best_trial) < trial_performance(scenario.best_trial)
         scenario.best_trial = best_trial
     end
 
-    status.f_evals += length(trials)
+    scenario.status.f_evals += length(trials)
 end
 

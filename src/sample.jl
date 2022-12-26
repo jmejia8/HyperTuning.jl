@@ -2,12 +2,15 @@ function sample(scenario::Scenario)
     searchspace = scenario.parameters
     trials = Trial[]
 
+    value_id = 0
     # FIXME remove zip
-    for (values, _) in zip(scenario.sampler, 1:10)
+    for (values, _) in zip(scenario.sampler, 1:100)
         # TODO improve instance scheduler
-        for instance in scenario.instances
+        value_id += 1
+        for (instance_id, instance) in enumerate(scenario.instances)
             seed = 1
-            push!(trials, Trial(;fval = Inf, values, instance, seed))
+            fval =  Inf
+            push!(trials,Trial(;fval,values,instance,instance_id,seed,value_id))
         end
     end
     trials
