@@ -8,6 +8,7 @@ Metaheuristics = "bcdb8e00-2c21-11e9-3065-2b553b22f898"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SearchSpaces = "eb7571c6-2196-4f03-99b8-52a5a35b3163"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [compat]
 Reexport = "1.2.2"

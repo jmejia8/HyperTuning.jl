@@ -24,6 +24,7 @@ mutable struct Scenario <: AbstractScenario
     budget::Budget
     best_trial::GroupedTrial
     status::StatusParami
+    verbose::Bool
 end
 
 #=
@@ -41,7 +42,8 @@ function Scenario(;
         pruner = default_pruner(),
         instances = [1],
         max_trials = 30,
-        max_time = Inf
+        max_time = Inf,
+        verbose = false
     )
     _sampler = sampler(parameters)
     budget = Budget(max_trials, max_time)
@@ -52,7 +54,8 @@ function Scenario(;
              instances,
              budget,
              GroupedTrial(Trial[], 0),
-             StatusParami()
+             StatusParami(),
+             verbose,
             )
 end
 
@@ -65,6 +68,13 @@ function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
     append!(status.history, trials)
 
     update_best_trial!(scenario, trials)
+
+    if scenario.verbose
+        for t in trials
+            show(t)
+        end
+    end
+    
 
 end
 

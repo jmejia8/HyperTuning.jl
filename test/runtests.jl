@@ -51,7 +51,7 @@ using Parami
                 return x^2 + prod(y[1:N])
             end
             
-            my_instance*sin(x)^2 + sum(y[1:N])
+            my_instance*cos(x)^2 + sum(y[N+1:end])
         end
 
         params = parameters(:x => range(-10, 10, length = 5),
@@ -63,15 +63,12 @@ using Parami
                             instances  = 1:3,
                             sampler = Grid,
                             max_trials = Int(cardinality(params)*3),
+                            verbose=false,
                            )
 
         Parami.optimize!(f, scenario)
-        display(Parami.trial_performance.(scenario.status.history))
-        println("\n---")
-
-        println(scenario.best_trial.trials[1])
-        @show Parami.trial_performance(scenario.best_trial)
-        # @test scenario.best_trial.fval isa Real
+        display(scenario.best_trial)
+        @test Parami.trial_performance(scenario.best_trial) ≈ 19
     end
 
 end

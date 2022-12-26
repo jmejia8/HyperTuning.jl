@@ -23,6 +23,22 @@ struct GroupedTrial
     id::Int
 end
 
+function Base.show(io::IO, trial::GroupedTrial)
+    if isempty(trial.trials)
+        println(io, "GroupedTrial - Empty")
+        return
+    end
+    labs = "Instance " .* string.([t.instance_id for t in trial.trials])
+    vals = [t.fval for t in trial.trials]
+    plt = UnicodePlots.barplot(labs, vals, title="Trial")
+    show(io, plt)
+    println(io, "")
+    println(io, first(trial.trials).values)
+    
+    
+end
+
+
 function group_trials_by_instance(trials::Vector{<:Trial}, instances)
     if length(instances) <= 1
         return [GroupedTrial([trial], 1) for trial in trials]
