@@ -20,7 +20,7 @@ mutable struct MedianPruner <: AbstractPruner
 end
 
 
-function MedianPruner(start_after = 11, prune_after = 10)
+function MedianPruner(;start_after = 11, prune_after = 10)
     MedianPruner(start_after, prune_after, zeros(0, 0), false)
 end
 

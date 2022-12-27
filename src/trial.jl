@@ -185,8 +185,10 @@ function trial_performance(trial::AbstractVector{<:Trial})
     end
     
     # TODO improve this
-    v = sum(get_fvals(trial))
-    sign(v)*log10(abs(v)) / (1 + 100count_success(trial))
+    v1 = length(trial) - count_success(trial)
+    v2 = sum(get_fvals(trial))
+
+    100v1*(1 + abs(v2)) + v2
 end
 
 function trial_performance(trial::GroupedTrial)

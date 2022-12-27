@@ -22,7 +22,7 @@ end
 
 
 default_sampler() = AtRandom#(Random.default_rng())
-default_pruner() = MedianPruner()
+default_pruner() = NeverPrune()
 
 function suggest_budget(max_trials, max_evals, max_time, parameters, instances, sampler)
 

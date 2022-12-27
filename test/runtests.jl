@@ -107,7 +107,6 @@ using Parami
 
             fval = current_val
 
-
             fval <= 0 && report_success!(trial)
             fval
         end
@@ -120,12 +119,12 @@ using Parami
         scenario = Scenario(;parameters = params,
                             instances  = [sin, cos, abs],
                             sampler = Grid,
-                            max_trials = 125,
                             pruner = MedianPruner(),
                             verbose=true,
                            )
         Parami.optimize(f, scenario)
         display(top_parameters(scenario))
+        # display(scenario.status.history)
 
     end
 
