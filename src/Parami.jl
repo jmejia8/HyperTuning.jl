@@ -10,6 +10,7 @@ import Statistics as sts
 
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
 export best_parameters, top_parameters, report_success!, report_value!
+export should_prune
 
 include("pruners.jl")
 include("trial.jl")

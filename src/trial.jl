@@ -87,10 +87,11 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
     parameters = [t.trials[1].values[k] for t in trials, k in ks]
     ids = [t.id for t in trials]
     counter = [t.count_success for t in trials]
+    pruned = [t.pruned for t in trials]
 
     stats = [t.performance for t in trials]
-    data = hcat(ids, parameters, stats, counter)
-    h = vcat("ID", ks, "Performance", "Success")
+    data = hcat(ids, parameters, stats, counter, pruned)
+    h = vcat("ID", ks, "Performance", "Success", "Pruned")
 
     mask = sortperm(stats)
     data = data[mask, :]

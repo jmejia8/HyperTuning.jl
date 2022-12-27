@@ -51,7 +51,7 @@ function update_pruner!(pruner::MedianPruner, history, n_instances::Int)
 end
 
 function should_prune(pruner::MedianPruner, step::Int, instance_id::Int, val)
-    if !pruned.started || step < pruner.prune_after
+    if !pruner.started || step < pruner.prune_after
         return false
     end
     

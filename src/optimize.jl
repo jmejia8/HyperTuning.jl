@@ -6,7 +6,7 @@ function evaluate_trial(f, trial::Trial)
     fval = f(trial)
     if isnothing(fval)
         fval = Inf
-        trial.prunded = true
+        trial.pruned = true
     end
 
     trial.fval = fval
