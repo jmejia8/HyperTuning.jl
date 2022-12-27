@@ -37,6 +37,11 @@ function update_pruner!(pruner::MedianPruner, history, n_instances::Int)
 
     n_record = first(first(history).trials).record |> length
 
+    if n_record == 0
+        return
+    end
+    
+
     data = zeros(length(trials), n_instances, n_record)
     for (i, grouped) in enumerate(trials)
         for trial in grouped.trials
