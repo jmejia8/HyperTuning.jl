@@ -8,12 +8,27 @@ Base.@kwdef mutable struct Trial{I}
     record::Vector = []
     pruned::Bool = false
     success::Bool = false
+    _pruner::AbstractPruner = NeverPrune()
 end
 
 get_instance(trial::Trial) = trial.instance
 get_seed(trial::Trial) = trial.seed
 report_success!(trial::Trial) = (trial.success = true)
+report_value!(trial::Trial, val) = push!(trial.record, val)
 
+function should_prune(trial::Trial)
+    step = length(trial.record)
+    if step == 0
+        return false
+    end
+
+    val = last(trial.record)
+    instance_id = trial.instance_id
+
+    pruned = should_prune(trial._pruner, step, instance_id, val)
+    trial.pruned = pruned
+    pruned
+end
 
 """
     GroupedTrial
@@ -25,6 +40,7 @@ struct GroupedTrial
     id::Int
     performance::Float64
     count_success::Int
+    pruned::Bool
 end
 
 function GroupedTrial(trials::Vector{T}) where T <: Trial
@@ -33,7 +49,8 @@ function GroupedTrial(trials::Vector{T}) where T <: Trial
     end
     performance = trial_performance(trials)
     counter = count_success(trials)
-    GroupedTrial(trials, first(trials).value_id, performance, counter)
+    pruned  = any(t.pruned for t in trials)
+    GroupedTrial(trials, first(trials).value_id, performance, counter, pruned)
 end
 
 function Base.show(io::IO, trial::GroupedTrial)
@@ -158,6 +175,7 @@ Base.@kwdef mutable struct StatusParami
     f_evals::Int = 0
     n_trials::Int = 0
     start_time::Float64 = time()
+    stop::Bool = false
 end
 
 function trial_performance(trial::AbstractVector{<:Trial})

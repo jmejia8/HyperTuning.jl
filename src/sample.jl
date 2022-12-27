@@ -1,7 +1,9 @@
 function sample(scenario::Scenario)
     trials = Trial[]
 
-    if scenario.status.f_evals > scenario.budget.max_trials
+    if scenario.status.f_evals > scenario.budget.max_evals
+        # TODO add message for this stopping criteria
+        scenario.status.stop = true
         return trials
     end
     
@@ -19,10 +21,18 @@ function sample(scenario::Scenario)
             counter += 1
         end
 
-        if budget_exceeded(scenario)
+        if budget_exceeded(scenario) || counter >= scenario.batch_size
             break
         end
     end
+
+    scenario.verbose && counter > 0 && @info "Evaluating batch with $counter trials..."
+
+    if counter == 0
+        # TODO add message for this stopping criteria
+        scenario.status.stop = true
+    end
+    
 
     trials
 end

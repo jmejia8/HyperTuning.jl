@@ -36,6 +36,7 @@ end
 
 function after_evaluation!(scenario::Scenario, f_values)
     report_values_to_sampler!(scenario, f_values)
+    update_pruner!(scenario.pruner, scenario.status.history, length(scenario.instances))
 
     scenario
 end
@@ -57,7 +58,7 @@ end
 
 
 function optimize(f::Function, scenario::Scenario)
-    while !should_stop(scenario)
+    while !budget_exceeded(scenario)
         optimize!(f, scenario)
     end
     scenario

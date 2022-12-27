@@ -1,14 +1,5 @@
 import Random
 abstract type AbstractScenario end
-abstract type AbstractPruner end
-
-struct MedianPruner <: AbstractPruner
-    start_after::Int
-end
-
-function MedianPruner(;start_after = 11)
-    MedianPruner(start_after)
-end
 
 
 struct Budget
@@ -26,6 +17,7 @@ mutable struct Scenario <: AbstractScenario
     best_trial::GroupedTrial
     status::StatusParami
     verbose::Bool
+    batch_size::Int
 end
 
 
@@ -63,7 +55,8 @@ function Scenario(;
         max_trials = :auto,
         max_evals  = :auto,
         max_time   = :auto,
-        verbose    = false
+        verbose    = false,
+        batch_size = 8,
     )
     _sampler = sampler(parameters)
 
@@ -77,6 +70,7 @@ function Scenario(;
              GroupedTrial(Trial[]),
              StatusParami(),
              verbose,
+             batch_size,
             )
 end
 
@@ -92,7 +86,7 @@ function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
 
     if scenario.verbose
         for t in trials
-            show(t)
+            println("Trial ", t.id, " ", t.performance)
         end
     end
     
@@ -100,7 +94,9 @@ function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
 end
 
 function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
-    @assert !isempty(trials)
+    if isempty(trials)
+        return
+    end
 
     best_trial = argmin(trial_performance, trials)
 

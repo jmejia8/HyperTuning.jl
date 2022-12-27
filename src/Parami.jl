@@ -4,13 +4,14 @@ using Reexport
 
 @reexport using SearchSpaces
 import SearchSpaces: AbstractSampler, AbstractSearchSpace
-# import UnicodePlots
+import UnicodePlots
 import PrettyTables
 import Statistics as sts
 
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
-export best_parameters, top_parameters, report_success!
+export best_parameters, top_parameters, report_success!, report_value!
 
+include("pruners.jl")
 include("trial.jl")
 include("scenario.jl")
 include("sample.jl")
