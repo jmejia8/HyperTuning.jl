@@ -47,11 +47,25 @@ using Parami
             @suggest N in trial
 
             my_instance = get_instance(trial)
+
             if my_instance == 1
-                return (10x)^2 + prod(y[1:N])
+                fval =  (x)^2 + prod(y[1:N])
+            else
+                fval = (x - 1/my_instance)^2 + sum(y[N+1:end])
             end
-            
-            my_instance*cos(π*x)^2 + sum(y[N+1:end])
+
+            current_val = 0.0
+            for iter in 1:19
+                current_val = fval + 19/iter - 1
+                report_value!(trial, current_val)
+                should_prune(trial) && (return)
+            end
+
+            fval = current_val
+
+
+            fval <= 1 && report_success!(trial)
+            fval
         end
 
         params = parameters(:x => range(-1, 1, length = 5),
@@ -62,13 +76,16 @@ using Parami
         scenario = Scenario(;parameters = params,
                             instances  = 1:3,
                             sampler = Grid,
-                            max_trials = Int(cardinality(params)*3),
+                            pruner = MedianPruner(),
                             verbose=true,
                            )
 
-        Parami.optimize!(f, scenario)
-        display(scenario.best_trial)
-        @test Parami.trial_performance(scenario.best_trial) ≈ 19
+        Parami.optimize(f, scenario)
+        display(top_parameters(scenario))
+        #display(best_parameters(scenario))
+        #display(scenario.status.history)
+        #display(best_parameters(scenario).trials[1])
+        @test Parami.trial_performance(scenario.best_trial) isa Real
     end
 
 end
