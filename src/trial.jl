@@ -84,7 +84,7 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
     end
 
     ks = collect(keys(first(trials).trials[1].values))
-    parameters = [t.trials[1].values[k] for t in trials, k in ks]
+    parameters = Any[t.trials[1].values[k] for t in trials, k in ks]
     ids = [t.id for t in trials]
     counter = [t.count_success for t in trials]
     pruned = [t.pruned for t in trials]
@@ -185,7 +185,8 @@ function trial_performance(trial::AbstractVector{<:Trial})
     end
     
     # TODO improve this
-    log10(sum(get_fvals(trial))) / (1 + 100count_success(trial))
+    v = sum(get_fvals(trial))
+    sign(v)*log10(abs(v)) / (1 + 100count_success(trial))
 end
 
 function trial_performance(trial::GroupedTrial)

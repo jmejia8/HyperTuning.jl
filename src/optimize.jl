@@ -5,7 +5,7 @@ end
 function evaluate_trial(f, trial::Trial, verbose = false)
     fval = f(trial)
     if isnothing(fval)
-        fval = Inf
+        fval = isempty(trial.record) ? Inf : last(trial.record)
         trial.pruned = true
     end
 
@@ -14,9 +14,12 @@ function evaluate_trial(f, trial::Trial, verbose = false)
     if verbose
         if trial.pruned
             step = length(trial.record)
-            printstyled("[-] Trial ", trial.value_id, " pruned in step ", step," at instance #", trial.instance_id, "\n", color=:light_black)
+            printstyled("[-] Trial ", trial.value_id, " pruned in step ", step," at instance ", trial.instance_id, "\n", color=:light_black)
         else
-            println("[+] Trial ", trial.value_id, " evaluated ", trial.fval, " at instance #", trial.instance_id)
+
+            c = trial.success ? :green : :default
+            m = trial.success ? "[*]" : "[+]"
+            printstyled(m, " Trial ", trial.value_id, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
         end
     end
 
@@ -31,8 +34,6 @@ function evaluate_objective(f::Function, scenario::Scenario)
     verbose = scenario.verbose
 
     trials = sample(scenario) # sampler(searchspace)
-    # TODO improve instances scheduler
-    # instances = scenario.instances
 
     # TODO parallelize this part
     fvals = [evaluate_trial(f, trial, verbose) for trial in trials]

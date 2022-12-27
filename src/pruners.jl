@@ -26,7 +26,8 @@ end
 
 
 function update_pruner!(pruner::MedianPruner, history, n_instances::Int)
-    if length(history) > pruner.start_after
+    if length(history) < pruner.start_after
+        # not enough history to start pruning
         return
     end
     

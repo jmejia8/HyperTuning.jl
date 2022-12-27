@@ -107,6 +107,5 @@ function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
         scenario.best_trial = best_trial
     end
 
-    scenario.status.f_evals += length(trials)
 end
 

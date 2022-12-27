@@ -77,7 +77,7 @@ using Parami
                             instances  = 1:3,
                             sampler = Grid,
                             pruner = MedianPruner(),
-                            verbose=true,
+                            verbose=false,
                            )
 
         Parami.optimize(f, scenario)
@@ -86,6 +86,47 @@ using Parami
         #display(scenario.status.history)
         #display(best_parameters(scenario).trials[1])
         @test Parami.trial_performance(scenario.best_trial) isa Real
+    end
+
+    @testset "Expensive" begin
+
+        function f(trial)
+            @suggest x in trial
+            @suggest y in trial
+            @suggest z in trial
+
+            g = get_instance(trial)
+            fval =  x^2 + y^2 + z^2 + g(x + y + z)
+
+            current_val = 0.0
+            for iter in 1:50
+                current_val = fval + 19/iter - 1
+                report_value!(trial, current_val)
+                should_prune(trial) && (return)
+            end
+
+            fval = current_val
+
+
+            fval <= 0 && report_success!(trial)
+            fval
+        end
+
+        params = parameters(:x => range(-1, 1, length = 5),
+                            :y => range(-1, 1, length = 5),
+                            :z => range(-1, 1, length = 5)
+                           )
+
+        scenario = Scenario(;parameters = params,
+                            instances  = [sin, cos, abs],
+                            sampler = Grid,
+                            max_trials = 125,
+                            pruner = MedianPruner(),
+                            verbose=true,
+                           )
+        Parami.optimize(f, scenario)
+        display(top_parameters(scenario))
+
     end
 
 end
