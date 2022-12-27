@@ -7,10 +7,12 @@ Base.@kwdef mutable struct Trial{I}
     seed::Int = 1
     record::Vector = []
     pruned::Bool = false
+    success::Bool = false
 end
 
 get_instance(trial::Trial) = trial.instance
 get_seed(trial::Trial) = trial.seed
+report_success!(trial::Trial) = (trial.success = true)
 
 
 """
@@ -22,14 +24,16 @@ struct GroupedTrial
     trials::Vector{Trial}
     id::Int
     performance::Float64
+    count_success::Int
 end
 
-function GroupedTrial(trials::Vector{Trial})
+function GroupedTrial(trials::Vector{T}) where T <: Trial
     if isempty(trials)
-        return GroupedTrial([Trial()], 0, Inf)
+        return GroupedTrial([Trial()])
     end
     performance = trial_performance(trials)
-    GroupedTrial(trials, first(trials).value_id, performance)
+    counter = count_success(trials)
+    GroupedTrial(trials, first(trials).value_id, performance, counter)
 end
 
 function Base.show(io::IO, trial::GroupedTrial)
@@ -57,27 +61,31 @@ function Base.show(io::IO, trial::GroupedTrial)
 
 end
 
-function trials_to_table(trials::Array{<:GroupedTrial})
+function trials_to_table(io, trials::Array{<:GroupedTrial})
     if isempty(trials)
-        return PrettyTables.pretty_table(zeros(0,0))
+        return PrettyTables.pretty_table(io, zeros(0,0))
     end
 
     ks = collect(keys(first(trials).trials[1].values))
     parameters = [t.trials[1].values[k] for t in trials, k in ks]
     ids = [t.id for t in trials]
+    counter = [t.count_success for t in trials]
 
     stats = [t.performance for t in trials]
-    data = hcat(ids, parameters, stats)
-    h = vcat("ID", ks, "Performance")
+    data = hcat(ids, parameters, stats, counter)
+    h = vcat("ID", ks, "Performance", "Success")
 
-    PrettyTables.pretty_table(data, header=h)
+    mask = sortperm(stats)
+    data = data[mask, :]
+
+    PrettyTables.pretty_table(io, data, header=h)
 end
 
 
 function Base.show(io::IO, ::MIME"text/plain", trials::Array{<:GroupedTrial})
     println(io, "PARAMETERS:")
-    show(io, trials_to_table(trials))
-    return 
+    trials_to_table(io, trials)
+    #=
 
     if isempty(trials)
         println(io, "GroupedTrials - Empty")
@@ -90,6 +98,7 @@ function Base.show(io::IO, ::MIME"text/plain", trials::Array{<:GroupedTrial})
     plt = UnicodePlots.barplot(labs[mask], vals[mask], title="Trials Performance")
     show(io, plt)
     println("")
+    =#
     
 end
 
@@ -117,7 +126,7 @@ end
 
 function group_trials_by_instance(trials::Vector{<:Trial}, instances)
     if length(instances) <= 1
-        return [GroupedTrial([trial], 1, trial.fval) for trial in trials]
+        return [GroupedTrial([trial]) for trial in trials]
     end
     trials = copy(trials)
     
@@ -136,7 +145,7 @@ function group_trials_by_instance(trials::Vector{<:Trial}, instances)
     grouped_trials
 end
 
-function get_fvals(trials::AbstractVector{Trial})
+function get_fvals(trials::AbstractVector{<:Trial})
     [t.fval for t in trials]
 end
 
@@ -151,16 +160,18 @@ Base.@kwdef mutable struct StatusParami
     start_time::Float64 = time()
 end
 
-function trial_performance(trial::AbstractVector{Trial})
+function trial_performance(trial::AbstractVector{<:Trial})
     if isempty(trial)
         return Inf
     end
     
     # TODO improve this
-    sum(get_fvals(trial))
+    log10(sum(get_fvals(trial))) / (1 + 100count_success(trial))
 end
 
 function trial_performance(trial::GroupedTrial)
     trial.performance
 end
 
+count_success(trials::Vector{<:Trial}) = count(t.success for t in trials)
+count_success(trial::GroupedTrial) = count_success(trial.trials)

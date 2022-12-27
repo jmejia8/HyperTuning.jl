@@ -6,9 +6,10 @@ using Reexport
 import SearchSpaces: AbstractSampler, AbstractSearchSpace
 # import UnicodePlots
 import PrettyTables
+import Statistics as sts
 
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
-export best_parameters, top_parameters
+export best_parameters, top_parameters, report_success!
 
 include("trial.jl")
 include("scenario.jl")
