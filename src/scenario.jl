@@ -21,7 +21,7 @@ mutable struct Scenario <: AbstractScenario
 end
 
 
-default_sampler() = AtRandom#(Random.default_rng())
+default_sampler() = RandomSampler#(Random.default_rng())
 default_pruner() = NeverPrune()
 
 function suggest_budget(max_trials, max_evals, max_time, parameters, instances, sampler)

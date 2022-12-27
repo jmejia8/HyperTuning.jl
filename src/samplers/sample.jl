@@ -1,14 +1,9 @@
+include("grid_sampler.jl")
+include("random_sampler.jl")
+
 function sample(scenario::Scenario)
     trials = Trial[]
 
-    #=
-    if scenario.status.f_evals > scenario.budget.max_evals
-        # TODO add message for this stopping criteria
-        scenario.status.stop = true
-        return trials
-    end
-    =#
-    
     searchspace = scenario.parameters
  
     counter = 0
