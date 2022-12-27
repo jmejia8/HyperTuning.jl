@@ -84,11 +84,13 @@ function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
 
     update_best_trial!(scenario, trials)
 
+    #=
     if scenario.verbose
         for t in trials
             println("Trial ", t.id, " ", t.performance)
         end
     end
+    =#
     
 
 end

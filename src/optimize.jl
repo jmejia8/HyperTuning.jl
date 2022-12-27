@@ -2,7 +2,7 @@ function get_available_samples(scenario)
     1
 end
 
-function evaluate_trial(f, trial::Trial)
+function evaluate_trial(f, trial::Trial, verbose = false)
     fval = f(trial)
     if isnothing(fval)
         fval = Inf
@@ -10,6 +10,17 @@ function evaluate_trial(f, trial::Trial)
     end
 
     trial.fval = fval
+ 
+    if verbose
+        if trial.pruned
+            step = length(trial.record)
+            printstyled("[-] Trial ", trial.value_id, " pruned in step ", step," at instance #", trial.instance_id, "\n", color=:light_black)
+        else
+            println("[+] Trial ", trial.value_id, " evaluated ", trial.fval, " at instance #", trial.instance_id)
+        end
+    end
+
+
     trial.fval
 end
 
@@ -17,13 +28,14 @@ end
 function evaluate_objective(f::Function, scenario::Scenario)
     sampler = scenario.sampler
     searchspace = scenario.parameters
+    verbose = scenario.verbose
 
     trials = sample(scenario) # sampler(searchspace)
     # TODO improve instances scheduler
     # instances = scenario.instances
 
     # TODO parallelize this part
-    fvals = [evaluate_trial(f, trial) for trial in trials]
+    fvals = [evaluate_trial(f, trial, verbose) for trial in trials]
     scenario.status.f_evals += length(fvals)
     save_trials!(trials, scenario)
 

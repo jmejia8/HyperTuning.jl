@@ -27,7 +27,7 @@ function sample(scenario::Scenario)
         end
     end
 
-    scenario.verbose && counter > 0 && @info "Evaluating batch with $counter trials..."
+    # scenario.verbose && counter > 0 && @info "Evaluating batch with $counter trials..."
 
     if counter == 0
         # TODO add message for this stopping criteria
