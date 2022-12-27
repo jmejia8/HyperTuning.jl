@@ -1,5 +1,6 @@
 include("grid_sampler.jl")
 include("random_sampler.jl")
+include("bcap_sampler.jl")
 
 function sample(scenario::Scenario)
     trials = Trial[]
