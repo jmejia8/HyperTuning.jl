@@ -3,6 +3,20 @@ using Parami
 
 
 @testset verbose = true "API" begin
+    @testset "Samplers" begin
+        parms = parameters(
+                           :y => Bounds([2, 3, 4], [10, 20, 30]),
+                           :x => Bounds([-1, -1, -1.0], [1.0, 1.0, 1.0]),
+                           :N => 1:10
+                          )
+        sampler = BCAPSampler(parms)
+        i = 1
+        for v in zip(1:20, sampler)
+            display(v[2])
+            println("")
+        end
+
+    end
 
     @testset "Scenario" begin
         parms = parameters(
@@ -81,7 +95,7 @@ using Parami
                            )
 
         Parami.optimize(f, scenario)
-        display(top_parameters(scenario))
+        # display(top_parameters(scenario))
         #display(best_parameters(scenario))
         #display(scenario.status.history)
         #display(best_parameters(scenario).trials[1])
@@ -120,10 +134,10 @@ using Parami
                             instances  = [sin, cos, abs],
                             sampler = Grid,
                             pruner = MedianPruner(),
-                            verbose=true,
+                            verbose=false,
                            )
         Parami.optimize(f, scenario)
-        display(top_parameters(scenario))
+        # display(top_parameters(scenario))
         # display(scenario.status.history)
 
     end
