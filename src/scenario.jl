@@ -75,24 +75,12 @@ function Scenario(;
 end
 
 
-function save_trials!(_trials::Vector{<:Trial}, scenario::Scenario)
+function save_trials!(ungrouped_trials::Vector{<:Trial}, scenario::Scenario)
     status = scenario.status
-
-    trials = group_trials_by_instance(_trials, scenario.instances)
-
+    trials = group_trials_by_instance(ungrouped_trials, scenario.instances)
     append!(status.history, trials)
-
     update_best_trial!(scenario, trials)
-
-    #=
-    if scenario.verbose
-        for t in trials
-            println("Trial ", t.id, " ", t.performance)
-        end
-    end
-    =#
-    
-
+    report_values_to_sampler!(scenario.sampler, trials)
 end
 
 function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})

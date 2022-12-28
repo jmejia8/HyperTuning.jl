@@ -43,18 +43,14 @@ function evaluate_objective(f::Function, scenario::Scenario)
     fvals
 end
 
+
 function before_evaluation!(scenario::Scenario)
     scenario
 end
 
 function after_evaluation!(scenario::Scenario, f_values)
-    report_values_to_sampler!(scenario, f_values)
     update_pruner!(scenario.pruner, scenario.status.history, length(scenario.instances))
 
-    scenario
-end
-
-function report_values_to_sampler!(scenario::Scenario, f_values)
     scenario
 end
 

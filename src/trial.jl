@@ -37,6 +37,7 @@ Trials grouped per instance.
 """
 struct GroupedTrial
     trials::Vector{Trial}
+    values::Dict
     id::Int
     performance::Float64
     count_success::Int
@@ -50,7 +51,9 @@ function GroupedTrial(trials::Vector{T}) where T <: Trial
     performance = trial_performance(trials)
     counter = count_success(trials)
     pruned  = any(t.pruned for t in trials)
-    GroupedTrial(trials, first(trials).value_id, performance, counter, pruned)
+    values = first(trials).values
+    value_id = first(trials).value_id
+    GroupedTrial(trials, values, value_id, performance, counter, pruned)
 end
 
 function Base.show(io::IO, trial::GroupedTrial)

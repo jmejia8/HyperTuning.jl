@@ -1,3 +1,5 @@
+abstract type PopulationBasedSampler <: AbstractRNGSampler end
+
 export BCAPSampler
 
 """
@@ -5,44 +7,36 @@ export BCAPSampler
 
 Define a random iterator for the search space.
 """
-mutable struct BCAPSampler{R} <: AbstractRNGSampler
+mutable struct BCAPSampler{R} <: PopulationBasedSampler
     rng::R
     population::Array
+    fitness::Vector{Float64}
     mass::Vector{Float64}
     population_size::Int
-    n_evaluated::Int
 end
 
-BCAPSampler() = BCAPSampler(Random.default_rng(), [], zeros(0), 0, 0)
+BCAPSampler() = BCAPSampler(Random.default_rng(), [], zeros(0), zeros(0), 0)
 
 function _init_BCAPSampler!(bcap, searchspace, rng)
-    display(searchspace)
     _n = SearchSpaces.getdim(searchspace)
     # TODO: is 100 the best upper bound?
     N = clamp(round(Int, sqrt(_n)*_n), 10, 100)
 
-    # random initialization
-    bcap.population = rand(rng, searchspace, N)
-    bcap.mass = ones(N)
     bcap.population_size = N
-
     bcap
-    #BCAPSampler(rng, population, mass, N, 0)
 end
 
-#=
 function BCAPSampler(searchspace::AtomicSearchSpace; rng=Random.default_rng())
     _init_BCAPSampler!(BCAPSampler(), searchspace, rng)
 end
-=#
 
 
 function BCAPSampler(searchspace::MixedSpace; rng=Random.default_rng())
-    ss = Dict(k => Sampler(BCAPSampler(), searchspace.domain[k]) for k in keys(searchspace.domain))
+    ss = Dict(k => Sampler(BCAPSampler(searchspace.domain[k]; rng), searchspace.domain[k]) for k in keys(searchspace.domain))
     Sampler(ss, searchspace, cardinality(searchspace))
 end
 
-function BCAPSampler(searchspace::AbstractSearchSpace; rng=Random.default_rng())
+function BCAPSampler(searchspace::AtomicSearchSpace; rng=Random.default_rng())
     Sampler(BCAPSampler(), searchspace)
 end
 
@@ -76,17 +70,12 @@ end
 
 function SearchSpaces.value(sampler::Sampler{S, B}) where {S<:BCAPSampler,B<:Bounds}
     bcap = sampler.method
-    
-    if isempty(bcap.population)
-        _init_BCAPSampler!(bcap, sampler.searchspace, bcap.rng)
-    end
-
     population = bcap.population
+    searchspace = sampler.searchspace
 
-    # check whether current population is evaluated
-    if bcap.n_evaluated < bcap.population_size
-        bcap.n_evaluated += 1
-        return population[bcap.n_evaluated]
+    # initialization
+    if length(population) < bcap.population_size
+        return rand(bcap.rng, searchspace)
     end
 
     _bcap_candidate(population, bcap.mass, sampler.searchspace, bcap.rng)
@@ -99,3 +88,39 @@ end
 function value(sampler::Sampler{R, P}) where {R<:BCAPSampler, P<:Permutations}
 end
 =#
+
+
+function _bca_update_mass!(bcap)
+    fitness = bcap.fitness
+    M = maximum(abs.(fitness))
+    bcap.mass = 2M .- fitness
+    bcap
+end
+
+function report_values_to_sampler!(
+        sampler::Sampler{R, P},
+        val_and_fvals::Vector{<:Tuple}
+    ) where {R<:BCAPSampler, P <: Bounds}
+
+    bcap = sampler.method
+
+    append!(bcap.population, first.(val_and_fvals))
+    append!(bcap.fitness, last.(val_and_fvals))
+
+    # reduce population elements
+    population_size = bcap.population_size
+    if length(bcap.population) <= population_size
+        # nothing to remove
+        return
+    end
+    # delete elements in population
+    delete = sortperm(bcap.fitness)[population_size+1:end]
+    sort!(delete)
+    deleteat!(bcap.population, delete)
+    deleteat!(bcap.fitness, delete)
+
+    # update mass values
+    _bca_update_mass!(bcap)
+    display(bcap.population)
+end
+

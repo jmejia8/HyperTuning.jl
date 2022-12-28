@@ -2,6 +2,21 @@ include("grid_sampler.jl")
 include("random_sampler.jl")
 include("bcap_sampler.jl")
 
+report_values_to_sampler!(sampler::Sampler, trials) = nothing
+
+function report_values_to_sampler!(sampler::Sampler{R, P}, trials::Array) where {R <: Dict, P <: MixedSpace}
+    if isempty(trials)
+        return
+    end
+
+    
+    for p in sampler.method
+        k, samp = p
+        data = [(trial.values[k], trial.performance) for trial in trials]
+        report_values_to_sampler!(samp, data)
+    end
+end
+
 function sample(scenario::Scenario)
     trials = Trial[]
 
@@ -33,3 +48,4 @@ function sample(scenario::Scenario)
 
     trials
 end
+
