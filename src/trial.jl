@@ -186,6 +186,11 @@ function trial_performance(trial::AbstractVector{<:Trial})
     if isempty(trial)
         return Inf
     end
+
+    if length(trial) == 1
+        return first(get_fvals(trial)) 
+    end
+    
     
     # TODO improve this
     v1 = length(trial) - count_success(trial)

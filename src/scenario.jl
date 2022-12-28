@@ -1,6 +1,6 @@
-import Random
 abstract type AbstractScenario end
 
+default_rng_parami(seed=1223334444) = Random.Xoshiro(seed)
 
 struct Budget
     max_trials::Int

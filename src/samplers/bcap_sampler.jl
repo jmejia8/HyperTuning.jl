@@ -15,28 +15,28 @@ mutable struct BCAPSampler{R} <: PopulationBasedSampler
     population_size::Int
 end
 
-BCAPSampler() = BCAPSampler(Random.default_rng(), [], zeros(0), zeros(0), 0)
+BCAPSampler() = BCAPSampler(default_rng_parami(), [], zeros(0), zeros(0), 0)
 
 function _init_BCAPSampler!(bcap, searchspace, rng)
     _n = SearchSpaces.getdim(searchspace)
-    # TODO: is 100 the best upper bound?
-    N = clamp(round(Int, sqrt(_n)*_n), 10, 100)
+    # TODO: is 200 the best upper bound?
+    N = clamp(round(Int, sqrt(_n)*_n), 20, 200)
 
     bcap.population_size = N
     bcap
 end
 
-function BCAPSampler(searchspace::AtomicSearchSpace; rng=Random.default_rng())
+function BCAPSampler(searchspace::AtomicSearchSpace; rng=default_rng_parami())
     _init_BCAPSampler!(BCAPSampler(), searchspace, rng)
 end
 
 
-function BCAPSampler(searchspace::MixedSpace; rng=Random.default_rng())
+function BCAPSampler(searchspace::MixedSpace; rng=default_rng_parami())
     ss = Dict(k => Sampler(BCAPSampler(searchspace.domain[k]; rng), searchspace.domain[k]) for k in keys(searchspace.domain))
     Sampler(ss, searchspace, cardinality(searchspace))
 end
 
-function BCAPSampler(searchspace::AtomicSearchSpace; rng=Random.default_rng())
+function BCAPSampler(searchspace::AtomicSearchSpace; rng=default_rng_parami())
     Sampler(BCAPSampler(), searchspace)
 end
 
@@ -47,16 +47,18 @@ function _center_worst(population, mass, rng)
     sum(population[mask] .* m), population[argmin(m)]
 end
 
-function _fix_to_center!(x, c, bounds::Bounds)
-    mask = bounds.lb .> x .|| x .> bounds.ub
-    x[mask] = c[mask]
+function _fix_candidate!(x, bounds::Bounds)
+    mask = x .< bounds.lb
+    x[mask] = bounds.lb[mask]
+    mask = x .> bounds.ub
+    x[mask] = bounds.ub[mask]
     x
 end
 
 function _bcap_candidate_real(population, mass, bounds, rng)
     c, w = _center_worst(population, mass, rng)
-    x = rand(rng, population) + 2rand(rng)*(c - w)
-    _fix_to_center!(x, c, bounds)
+    x = rand(rng, population) + 1.2rand(rng)*(c - w)
+    _fix_candidate!(x, bounds)
 end
 
 function _bcap_candidate(population, mass, bounds::Bounds, rng)
@@ -68,21 +70,39 @@ function _bcap_candidate(population, mass, bounds::Bounds{T}, rng) where T <: In
     round.(T, x)
 end
 
-function SearchSpaces.value(sampler::Sampler{S, B}) where {S<:BCAPSampler,B<:Bounds}
+
+function _bcap_candidate(population, mass, booleans::BitArrays, rng) 
+    d = SearchSpaces.getdim(booleans)
+    bounds = Bounds(zeros(d), ones(d))
+    x = _bcap_candidate_real(population, mass, bounds, rng)
+    x .< 0.5
+end
+
+function _bcap_candidate(population, mass, searchspace::AtomicSearchSpace, rng)
+    rand(rng, searchspace)
+end
+
+function SearchSpaces.value(
+        sampler::Sampler{S, B}
+    ) where {S<:BCAPSampler, B<:Union{Bounds, BitArrays}}
     bcap = sampler.method
     population = bcap.population
     searchspace = sampler.searchspace
 
-    # initialization
+    # initialization at random
     if length(population) < bcap.population_size
         return rand(bcap.rng, searchspace)
     end
 
-    _bcap_candidate(population, bcap.mass, sampler.searchspace, bcap.rng)
+    v = _bcap_candidate(population, bcap.mass, sampler.searchspace, bcap.rng)
+    # TODO improve numerical samples
+    return length(v) == 1 ? first(v) : v
 end
 
 #=
 function value(sampler::Sampler{R, P}) where {R<:BCAPSampler,P<:BitArrays}
+    bcap = sampler.method
+    _bcap_candidate(bcap.population, bcap.mass, sampler.searchspace, bcap.rng)
 end
 
 function value(sampler::Sampler{R, P}) where {R<:BCAPSampler, P<:Permutations}
@@ -100,11 +120,13 @@ end
 function report_values_to_sampler!(
         sampler::Sampler{R, P},
         val_and_fvals::Vector{<:Tuple}
-    ) where {R<:BCAPSampler, P <: Bounds}
+    ) where {R<:BCAPSampler, P <: AbstractSearchSpace}
 
     bcap = sampler.method
 
-    append!(bcap.population, first.(val_and_fvals))
+    _pre_proc(v) = v isa Number ? [v] : v
+
+    append!(bcap.population, _pre_proc.(first.(val_and_fvals)))
     append!(bcap.fitness, last.(val_and_fvals))
 
     # reduce population elements
@@ -121,6 +143,5 @@ function report_values_to_sampler!(
 
     # update mass values
     _bca_update_mass!(bcap)
-    display(bcap.population)
 end
 

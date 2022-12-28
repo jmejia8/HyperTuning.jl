@@ -8,6 +8,7 @@ import SearchSpaces: Sampler, AtomicSearchSpace
 import UnicodePlots
 import PrettyTables
 import Statistics as sts
+import Random
 
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
 export best_parameters, top_parameters, report_success!, report_value!
