@@ -6,15 +6,31 @@ using Parami
     @testset "Samplers" begin
         parms = parameters(
                            :y => Bounds([2, 3, 4], [10, 20, 30]),
-                           :x => Bounds([-1, -1, -1.0], [1.0, 1.0, 1.0]),
-                           :N => 1:10
+                           :x => Bounds([-1,-1.0], [1.0, 1.0]),
+                           :a => Bounds(60.0, 200.0),
+                           :b => Bounds(1, 5),
+                           :w => BitArrays(3),
+                           :c => BitArrays(1),
+                           :z => [:red, :green, :blue],
+                           :N => 0:10
                           )
-        sampler = BCAPSampler(parms)
-        i = 1
-        for v in zip(1:20, sampler)
-            display(v[2])
-            println("")
+
+        scenario = Scenario(parameters = parms,
+                            sampler    = BCAPSampler,
+                            max_trials = 3,
+                           ) 
+        f(trial) = begin
+            @suggest x in trial
+            @suggest y in trial
+            @suggest w in trial
+            @suggest N in trial
+            @suggest a in trial
+            @suggest b in trial
+            a*(1 + sum(x.^2)) + N - b*sum(y) + sum(w)
         end
+
+        Parami.optimize(f, scenario)
+        @test true
 
     end
 

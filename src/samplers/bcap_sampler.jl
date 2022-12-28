@@ -99,17 +99,6 @@ function SearchSpaces.value(
     return length(v) == 1 ? first(v) : v
 end
 
-#=
-function value(sampler::Sampler{R, P}) where {R<:BCAPSampler,P<:BitArrays}
-    bcap = sampler.method
-    _bcap_candidate(bcap.population, bcap.mass, sampler.searchspace, bcap.rng)
-end
-
-function value(sampler::Sampler{R, P}) where {R<:BCAPSampler, P<:Permutations}
-end
-=#
-
-
 function _bca_update_mass!(bcap)
     fitness = bcap.fitness
     M = maximum(abs.(fitness))
