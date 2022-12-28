@@ -95,7 +95,7 @@ function SearchSpaces.value(
     end
 
     v = _bcap_candidate(population, bcap.mass, sampler.searchspace, bcap.rng)
-    # TODO improve numerical samples
+    # TODO improve for numerical samples
     return length(v) == 1 ? first(v) : v
 end
 
