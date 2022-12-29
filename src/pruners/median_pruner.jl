@@ -29,18 +29,22 @@ function update_pruner!(pruner::MedianPruner, history, n_instances::Int)
         return
     end
 
-    n_record = first(first(history).trials).record |> length
+    n_record = maximum(length(trial.record) for grouped in history for trial in grouped.trials)
 
     if n_record == 0
         return
     end
-    
 
+    # TODO improve memory performance
     data = zeros(length(trials), n_instances, n_record)
+    median_vals = zeros(n_instances, n_record)
     for (i, grouped) in enumerate(trials)
         for trial in grouped.trials
-            for (k, r) in enumerate(trial.record)
-                data[i, trial.instance_id, k] = r
+            k = length(trial.record)
+            data[i, trial.instance_id, 1:k] = trial.record
+            # complete record
+            if k < n_record
+                data[i, trial.instance_id, k+1:end] .= last(trial.record)
             end
         end
     end
@@ -50,7 +54,9 @@ function update_pruner!(pruner::MedianPruner, history, n_instances::Int)
 end
 
 function should_prune(pruner::MedianPruner, step::Int, instance_id::Int, val)
-    if !pruner.started || step < pruner.prune_after
+    if !pruner.started ||
+        step < pruner.prune_after ||
+        step > size(pruner.median_vals, 2) # current step exceeds n_record
         return false
     end
     

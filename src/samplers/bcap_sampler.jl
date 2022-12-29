@@ -122,6 +122,7 @@ function report_values_to_sampler!(
     population_size = bcap.population_size
     if length(bcap.population) <= population_size
         # nothing to remove
+        length(bcap.population) == population_size && _bca_update_mass!(bcap)
         return
     end
     # delete elements in population

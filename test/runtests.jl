@@ -17,7 +17,8 @@ using Parami
 
         scenario = Scenario(parameters = parms,
                             sampler    = BCAPSampler,
-                            max_trials = 3,
+                            max_trials = 100,
+                            verbose=false,
                            ) 
         f(trial) = begin
             @suggest x in trial
@@ -30,6 +31,8 @@ using Parami
         end
 
         Parami.optimize(f, scenario)
+        # display(best_parameters(scenario))
+        # display(scenario.status.history)
         @test true
 
     end
@@ -131,7 +134,7 @@ using Parami
             current_val = 0.0
             for iter in 1:50
                 current_val = fval + 19/iter - 1
-                report_value!(trial, current_val)
+                rand() < 0.9 && report_value!(trial, current_val)
                 should_prune(trial) && (return)
             end
 
@@ -150,7 +153,7 @@ using Parami
                             instances  = [sin, cos, abs],
                             sampler = Grid,
                             pruner = MedianPruner(),
-                            verbose=false,
+                            verbose=true,
                            )
         Parami.optimize(f, scenario)
         # display(top_parameters(scenario))
