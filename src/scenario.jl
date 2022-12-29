@@ -1,7 +1,7 @@
 abstract type AbstractScenario end
 
 default_rng_parami(seed=1223334444) = Random.Xoshiro(seed)
-default_sampler() = RandomSampler()
+default_sampler() = BCAPSampler()
 default_pruner() = NeverPrune()
 
 struct Budget

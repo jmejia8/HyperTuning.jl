@@ -126,7 +126,8 @@ function SearchSpaces.value(
     k = SearchSpaces.getdim(searchspace)
     # elements to transmit info
     _mask = rand(bcap.rng, eachindex(population), 3)
-    mask = _mask[sortperm(bcap.mass[_mask])]
+    # sort regarding maximum mass
+    mask = _mask[sortperm(bcap.mass[_mask], rev=true)]
 
     U = population[mask]
     ps = bcap.mass[mask]
@@ -134,6 +135,7 @@ function SearchSpaces.value(
 
     val = []
     for (u, p) in zip(U, ps)
+        # inherit with maximum probability for each candidate 
         rand(bcap.rng) < p && (continue)
         for v in (u isa Array ? u : [u])
             v in val && (continue)
@@ -143,13 +145,14 @@ function SearchSpaces.value(
         length(val) >= k && break
     end
 
-    # complete permutation
+    # complete permutation (if necessary)
     while length(val) < k
         vs = setdiff(searchspace.values, val)
         push!(val, rand(bcap.rng, vs))
     end
     val = [ v for v in val]
 
+    # permutations with length=1, return the value not the array
     if k == length(val) == 1
         return first(val)
     end

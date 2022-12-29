@@ -222,14 +222,15 @@ function Base.show(io::IO, trial::Trial)
 end
 
 function print_trial(trial::Trial)
+    p = collect(trial.values)
+    sort!(p, by=first)
     if trial.pruned
         step = length(trial.record)
-        printstyled("[-] Trial ", trial.value_id, " pruned in step ", step," at instance ", trial.instance_id, "\n", color=:light_black)
+        printstyled("[-] Trial ", trial.value_id,": ", p, " pruned in step ", step," at instance ", trial.instance_id, "\n", color=:light_black)
     else
-
         c = trial.success ? :green : :default
         m = trial.success ? "[*]" : "[+]"
-        printstyled(m, " Trial ", trial.value_id, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
+        printstyled(m, " Trial ", trial.value_id, ": ", p, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
     end
 end
 
