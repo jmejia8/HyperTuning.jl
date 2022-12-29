@@ -56,7 +56,7 @@ function Scenario(;
         max_evals  = :auto,
         max_time   = :auto,
         verbose    = false,
-        batch_size = 8,
+        batch_size = Sys.CPU_THREADS,
     )
     _sampler = sampler(parameters)
 

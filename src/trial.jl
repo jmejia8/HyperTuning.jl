@@ -205,3 +205,16 @@ end
 
 count_success(trials::Vector{<:Trial}) = count(t.success for t in trials)
 count_success(trial::GroupedTrial) = count_success(trial.trials)
+
+function print_trial(trial::Trial)
+    if trial.pruned
+        step = length(trial.record)
+        printstyled("[-] Trial ", trial.value_id, " pruned in step ", step," at instance ", trial.instance_id, "\n", color=:light_black)
+    else
+
+        c = trial.success ? :green : :default
+        m = trial.success ? "[*]" : "[+]"
+        printstyled(m, " Trial ", trial.value_id, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
+    end
+end
+
