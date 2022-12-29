@@ -43,12 +43,12 @@ function BCAPSampler(searchspace::MixedSpace;
         rng=default_rng_parami(),
         population_size = 0,
     )
-    ss = Dict(k => Sampler(BCAPSampler(searchspace.domain[k]; rng), searchspace.domain[k]) for k in keys(searchspace.domain))
+    ss = Dict(k => Sampler(BCAPSampler(searchspace.domain[k]; rng, population_size), searchspace.domain[k]) for k in keys(searchspace.domain))
     Sampler(ss, searchspace, cardinality(searchspace))
 end
 
-function BCAPSampler(searchspace::AtomicSearchSpace; rng=default_rng_parami())
-    Sampler(BCAPSampler(), searchspace)
+function BCAPSampler(searchspace::AtomicSearchSpace; rng=default_rng_parami(), population_size=0)
+    Sampler(BCAPSampler(;rng, population_size), searchspace)
 end
 
 function _center_worst(population, mass, rng)
@@ -108,6 +108,53 @@ function SearchSpaces.value(
     v = _bcap_candidate(population, bcap.mass, sampler.searchspace, bcap.rng)
     # TODO improve for numerical samples
     return length(v) == 1 ? first(v) : v
+end
+
+function SearchSpaces.value(
+        sampler::Sampler{S, B}
+    ) where {S<:BCAPSampler, B<:Permutations}
+
+    bcap = sampler.method
+    population = bcap.population
+    searchspace = sampler.searchspace
+
+    # initialization at random
+    if length(population) < bcap.population_size
+        return rand(bcap.rng, searchspace)
+    end
+
+    k = SearchSpaces.getdim(searchspace)
+    # elements to transmit info
+    _mask = rand(bcap.rng, eachindex(population), 3)
+    mask = _mask[sortperm(bcap.mass[_mask])]
+
+    U = population[mask]
+    ps = bcap.mass[mask]
+    ps /= sum(ps) # normalize
+
+    val = []
+    for (u, p) in zip(U, ps)
+        rand(bcap.rng) < p && (continue)
+        for v in (u isa Array ? u : [u])
+            v in val && (continue)
+            push!(val, v)
+            break
+        end
+        length(val) >= k && break
+    end
+
+    # complete permutation
+    while length(val) < k
+        vs = setdiff(searchspace.values, val)
+        push!(val, rand(bcap.rng, vs))
+    end
+    val = [ v for v in val]
+
+    if k == length(val) == 1
+        return first(val)
+    end
+    
+    val
 end
 
 function _bca_update_mass!(bcap)
