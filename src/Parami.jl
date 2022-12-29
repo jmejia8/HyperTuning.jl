@@ -12,7 +12,7 @@ using Distributed
 
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
 export best_parameters, top_parameters, report_success!, report_value!
-export should_prune
+export should_prune,  RandomSampler, GridSampler
 
 include("pruners/pruners.jl")
 include("trial.jl")
@@ -22,6 +22,7 @@ include("parameters.jl")
 include("suggest.jl")
 include("optimize.jl")
 include("stop.jl")
+include("tester/test_scenario.jl")
 
 
 

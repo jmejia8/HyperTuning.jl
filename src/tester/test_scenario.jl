@@ -1,0 +1,47 @@
+function check_scenario(f::Function, scenario::Scenario; verbose=true)
+    trials = nothing
+    try
+        trials = sample(scenario::Scenario)
+    catch e
+        @error "Parami: I cannot sample trials due to:"
+        println("Error: ", e)
+        return false
+    end
+
+    if isempty(trials)
+        @error "Parami: I cannot sample trials."
+        println("Check sampler o parameters config.")
+        println("Provided parameters: ", scenario.parameters)
+        println("Provided Sampler: ", scenario.sampler)
+        return false
+    end
+
+    trial = first(trials)
+
+    fv = nothing
+    try
+        fv = f(trial)
+    catch  e
+        @error "Parami: Objective function contains the following error:"
+        println(e)
+        return false
+    end
+    
+    # TODO consider multi-objective
+    if !(fv isa Number)
+        @error "Parami: Objective function must report a numerical value (except for pruned trials)."
+        println("Value reported: ", fv)
+        return false
+    end
+
+    if verbose
+        @info "Parami: Sampler and Objective function did not report errors."
+        println("Evaluated trial: ")
+        display(trial.values)
+        println("")
+        @info "Done."
+    end
+    
+    true
+end
+

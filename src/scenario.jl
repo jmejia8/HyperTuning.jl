@@ -1,6 +1,8 @@
 abstract type AbstractScenario end
 
 default_rng_parami(seed=1223334444) = Random.Xoshiro(seed)
+default_sampler() = RandomSampler()
+default_pruner() = NeverPrune()
 
 struct Budget
     max_trials::Int
@@ -20,33 +22,6 @@ mutable struct Scenario <: AbstractScenario
     batch_size::Int
 end
 
-
-default_sampler() = RandomSampler#(Random.default_rng())
-default_pruner() = NeverPrune()
-
-function suggest_budget(max_trials, max_evals, max_time, parameters, instances, sampler)
-
-    max_time = max_time isa Symbol ? Inf : max_time
-
-    if max_trials === :auto
-        card = n_parameters = SearchSpaces.getdim(parameters)
-        try 
-            card = cardinality(parameters) |> Int
-        catch InexactError
-            card = 20n_parameters
-        end
-
-        max_trials = min(card, 1000)
-    end
-
-    if max_evals ===  :auto
-        max_evals = max_trials*length(instances)
-    end
-
-    Budget(max_trials, max_time, max_evals)
-end
-
-
 function Scenario(;
         parameters = MixedSpace(),
         sampler    = default_sampler(),
@@ -58,7 +33,7 @@ function Scenario(;
         verbose    = false,
         batch_size = max(nprocs(), Sys.CPU_THREADS),
     )
-    _sampler = sampler(parameters)
+    _sampler = Sampler(sampler, parameters)
 
     budget = suggest_budget(max_trials, max_evals, max_time, parameters, instances, _sampler)
 
@@ -97,3 +72,24 @@ function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
 
 end
 
+
+function suggest_budget(max_trials, max_evals, max_time, parameters, instances, sampler)
+    max_time = max_time isa Symbol ? Inf : max_time
+
+    if max_trials === :auto
+        card = n_parameters = SearchSpaces.getdim(parameters)
+        try 
+            card = cardinality(parameters) |> Int
+        catch InexactError
+            card = 20n_parameters
+        end
+
+        max_trials = min(card, 1000)
+    end
+
+    if max_evals ===  :auto
+        max_evals = max_trials*length(instances)
+    end
+
+    Budget(max_trials, max_time, max_evals)
+end
