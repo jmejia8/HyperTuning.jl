@@ -13,14 +13,10 @@ function evaluate_trial!(f, trial::Trial, verbose = false)
 end
 
 function evaluate_objective_sequential(f::Function, scenario::Scenario)
-    sampler = scenario.sampler
-    searchspace = scenario.parameters
     verbose = scenario.verbose
+    trials = sample(scenario)
 
-    trials = sample(scenario) # sampler(searchspace)
-
-
-    Threads.@threads for i in eachindex(trials)
+    for i in eachindex(trials)
         evaluate_trial!(f, trials[i], verbose)
     end
     scenario.status.f_evals += length(trials)
