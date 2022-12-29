@@ -22,6 +22,37 @@ mutable struct Scenario <: AbstractScenario
     batch_size::Int
 end
 
+import Printf: @printf
+function Base.show(io::IO, scenario::Scenario)
+    optimized = isempty(scenario.best_trial.values)
+
+    if optimized
+        println(io, "Scenario:")
+    else
+        println(io, "Scenario: evaluated ", length(history(scenario)) , " trials.")
+    end
+
+    c = cardinality(scenario.parameters)
+    parameters = collect(scenario.parameters.domain |> keys .|> string) |> sort
+
+    @printf(io, "% 20s: ", "parameters")
+    println(io, join(parameters, ", "))
+    @printf(io, "% 20s: ", "space cardinality")
+    println(io, isfinite(c) && c < 5e6 ? c : "Huge!")
+    @printf(io, "% 20s: ", "instances")
+    println(io, length(scenario.instances) == 1 ? first(scenario.instances) : scenario.instances)
+    @printf(io, "% 20s: %d\n", "batch_size", scenario.batch_size)
+    @printf(io, "% 20s: ", "sampler")
+    println(io, string(typeof(last(first(scenario.sampler.method)).method)))
+    @printf(io, "% 20s: ", "pruner")
+    println(io, string(typeof(scenario.pruner)))
+
+    if !optimized
+        @printf(io, "% 20s: \n", "best_trial")
+        show(io, scenario.best_trial)
+    end
+end
+
 function Scenario(;
         parameters = MixedSpace(),
         sampler    = default_sampler(),
@@ -69,7 +100,13 @@ function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
     if trial_performance(best_trial) < trial_performance(scenario.best_trial)
         scenario.best_trial = best_trial
     end
+end
 
+
+history(scenario::Scenario) = history(scenario.status)
+
+function export_history(scenario::Scenario)
+    # TODO
 end
 
 

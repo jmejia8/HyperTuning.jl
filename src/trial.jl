@@ -185,6 +185,8 @@ Base.@kwdef mutable struct StatusParami
     stop::Bool = false
 end
 
+history(status::StatusParami) = status.history
+
 function trial_performance(trial::AbstractVector{<:Trial})
     if isempty(trial)
         return Inf
