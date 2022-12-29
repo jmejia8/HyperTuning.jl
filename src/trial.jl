@@ -139,6 +139,11 @@ function top_parameters(scenario)
         end
         push!(ts, trial)
     end
+
+    if length(ts) == 1
+        return first(ts)
+    end
+    
     ts
 end
 
