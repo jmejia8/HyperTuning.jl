@@ -61,24 +61,33 @@ function Base.show(io::IO, trial::GroupedTrial)
         println(io, "GroupedTrial - Empty")
         return
     end
-    labs = "Instance " .* string.([t.instance_id for t in trial.trials])
-    vals = [t.fval for t in trial.trials]
 
-    println(io, "::::::::::::::::::::::::::::::::::::::::::::::")
-    println(io, ":::::::::::: P A R A M E T E R S :::::::::::::")
-    println(io, "::::::::::::::::::::::::::::::::::::::::::::::")
-    for v in first(trial.trials).values
-        print(io, first(v), " = ", last(v), ";  ")
+    h = (["Trial", "Value"], [trial.id, ""])
+
+    _trial = first(trial.trials)
+    ks = sort(keys(_trial.values) |> collect)
+    v = [_trial.values[k] for k in ks]
+    parameters = Any[ks v]
+    data = parameters
+
+    if length(trial.trials) == 1
+        data = vcat(
+                    data,
+                    ["Pruned"  _trial.pruned],
+                    ["Success" _trial.success],
+                    ["Objective" _trial.fval],
+                   )
+    else
+        data = vcat(data, Any["Instance" ""])
+        vals = [t.fval for t in trial.trials]
+        labs = [t.instance for t in trial.trials]
+        # success = [t.success for t in trial.trials]
+        # pruned = [t.pruned for t in trial.trials]
+
+        data = vcat(data, Any[labs vals])
     end
-    println(io, "")
-    plt = UnicodePlots.barplot(labs, vals, title="Instances")
-    show(io, plt)
-    println(io, "")
-    println(io, "::::::::::::::::::::::::::::::::::::::::::::::")
-    
-    
-    
 
+    PrettyTables.pretty_table(io, data, header=h)
 end
 
 function trials_to_table(io, trials::Array{<:GroupedTrial})
@@ -86,7 +95,7 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
         return PrettyTables.pretty_table(io, zeros(0,0))
     end
 
-    ks = collect(keys(first(trials).trials[1].values))
+    ks = collect(keys(first(trials).trials[1].values)) |> collect |> sort
     parameters = Any[t.trials[1].values[k] for t in trials, k in ks]
     ids = [t.id for t in trials]
     counter = [t.count_success for t in trials]
@@ -103,24 +112,13 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
 end
 
 
-function Base.show(io::IO, ::MIME"text/plain", trials::Array{<:GroupedTrial})
+function Base.show(io::IO, m::MIME"text/plain", trials::Array{<:GroupedTrial})
+    if length(trials) == 1
+        return Base.show(io, m, first(trials))
+    end
+    
     println(io, "PARAMETERS:")
     trials_to_table(io, trials)
-    #=
-
-    if isempty(trials)
-        println(io, "GroupedTrials - Empty")
-        return
-    end
-    labs = "Trial " .* string.([t.id for t in trials])
-    vals = [t.performance for t in trials]
-
-    mask = sortperm(vals)
-    plt = UnicodePlots.barplot(labs[mask], vals[mask], title="Trials Performance")
-    show(io, plt)
-    println("")
-    =#
-    
 end
 
 function best_parameters(scenario)
@@ -205,6 +203,18 @@ end
 
 count_success(trials::Vector{<:Trial}) = count(t.success for t in trials)
 count_success(trial::GroupedTrial) = count_success(trial.trials)
+
+function Base.show(io::IO, trial::Trial)
+    if trial.pruned
+        step = length(trial.record)
+        printstyled(io, "[-] Trial ", trial.value_id, " pruned in step ", step," at instance ", trial.instance_id, "\n", color=:light_black)
+    else
+
+        c = trial.success ? :green : :default
+        m = trial.success ? "[*]" : "[+]"
+        printstyled(io, m, " Trial ", trial.value_id, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
+    end
+end
 
 function print_trial(trial::Trial)
     if trial.pruned

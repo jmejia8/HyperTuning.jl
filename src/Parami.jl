@@ -5,7 +5,6 @@ using Reexport
 @reexport using SearchSpaces
 import SearchSpaces: AbstractSampler, AbstractSearchSpace, AbstractRNGSampler
 import SearchSpaces: Sampler, AtomicSearchSpace
-import UnicodePlots
 import PrettyTables
 import Statistics as sts
 import Random
