@@ -43,7 +43,12 @@ function Base.show(io::IO, scenario::Scenario)
     println(io, length(scenario.instances) == 1 ? first(scenario.instances) : scenario.instances)
     @printf(io, "% 20s: %d\n", "batch_size", scenario.batch_size)
     @printf(io, "% 20s: ", "sampler")
-    println(io, string(typeof(last(first(scenario.sampler.method)).method)))
+    if scenario.sampler.method isa Dict
+        println(io, string(typeof(last(first(scenario.sampler.method)).method)))
+    else
+        println(io, string(typeof(scenario.sampler.method)))
+    end
+    
     @printf(io, "% 20s: ", "pruner")
     println(io, string(typeof(scenario.pruner)))
     @printf(io, "% 20s: %d\n", "max_trials", scenario.budget.max_trials)
