@@ -1,11 +1,18 @@
 function evaluate_trial!(f, trial::Trial, verbose = false)
+    # count time
+    tic = time()
+    # valuate objective function
     fval = f(trial)
+    # save elapsed time
+    elapsed_time = time() - tic
+
     if isnothing(fval)
         fval = isempty(trial.record) ? Inf : last(trial.record)
         trial.pruned = true
     end
 
     trial.fval = fval
+    trial.time_eval = elapsed_time
  
     verbose && print_trial(trial)
 

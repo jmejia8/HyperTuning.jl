@@ -22,7 +22,11 @@ mutable struct Scenario <: AbstractScenario
     batch_size::Int
 end
 
-import Printf: @printf
+function default_stop_criteria(scenario::Scenario)
+    budget_exceeded(scenario) ||
+    all_instances_succeeded(scenario)
+end
+
 function Base.show(io::IO, scenario::Scenario)
     optimized = isempty(scenario.best_trial.values)
 
@@ -53,6 +57,11 @@ function Base.show(io::IO, scenario::Scenario)
     println(io, string(typeof(scenario.pruner)))
     @printf(io, "% 20s: %d\n", "max_trials", scenario.budget.max_trials)
     @printf(io, "% 20s: %d\n", "max_evals", scenario.budget.max_evals)
+
+    if scenario.status.stop_reason != NotOptimized()
+        @printf(io, "% 20s: ", "stop_reason")
+        println(io, scenario.status.stop_reason)
+    end
 
     if !optimized
         @printf(io, "% 20s: \n", "best_trial")
@@ -98,20 +107,23 @@ end
 
 function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
     if isempty(trials)
-        return
+        return scenario
     end
 
-    best_trial = argmin(trial_performance, trials)
-
-    # TODO consider multi-objective
-    if trial_performance(best_trial) < trial_performance(scenario.best_trial)
-        scenario.best_trial = best_trial
+    for trial in trials
+        if isbetter(scenario.best_trial, trial)
+            continue
+        end
+        scenario.best_trial = trial
     end
+
+    scenario
 end
 
 
 history(scenario::Scenario) = history(scenario.status)
 get_convergence(scenario::Scenario) = get_convergence(scenario.status)
+allsucceeded(scenario::Scenario) = allsucceeded(scenario.best_trial)
 
 function export_history(scenario::Scenario)
     # TODO

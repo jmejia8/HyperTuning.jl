@@ -1,8 +1,13 @@
-function budget_exceeded(scenario::Scenario)
-    scenario.status.stop = scenario.status.stop ||
-    scenario.status.n_trials >= scenario.budget.max_trials ||
-    scenario.status.f_evals >= scenario.budget.max_evals
+abstract type AbstractStop end
 
-    scenario.status.stop
+struct NotOptimized <: AbstractStop end
+struct AllInstancesSucceeded <: AbstractStop end
+
+Base.@kwdef struct NoMoreTrials <: AbstractStop
+    msg::String = "Sampler refuses to suggest trials"
+end
+
+Base.@kwdef struct BudgetExceeded <: AbstractStop
+    msg::String = "max_trials or max_evals or max_time exceeded"
 end
 

@@ -8,6 +8,7 @@ Base.@kwdef mutable struct Trial{I}
     record::Vector = []
     pruned::Bool = false
     success::Bool = false
+    time_eval::Float64 = 0.0
     _pruner::AbstractPruner = NeverPrune()
 end
 
@@ -42,6 +43,7 @@ struct GroupedTrial
     performance::Float64
     count_success::Int
     pruned::Bool
+    time_eval::Float64
 end
 
 function GroupedTrial(trials::Vector{T}) where T <: Trial
@@ -53,7 +55,42 @@ function GroupedTrial(trials::Vector{T}) where T <: Trial
     pruned  = any(t.pruned for t in trials)
     values = first(trials).values
     value_id = first(trials).value_id
-    GroupedTrial(trials, values, value_id, performance, counter, pruned)
+    t = sum(trial.time_eval for trial in trials)
+    GroupedTrial(trials,
+                 values,
+                 value_id,
+                 performance,
+                 counter,
+                 pruned,
+                 t)
+end
+
+function isbetter(ga::GroupedTrial, gb::GroupedTrial)
+
+    # check successful instances
+    if count_success(ga) < count_success(gb)
+        return false
+    elseif count_success(ga) > count_success(gb)
+        return true
+    end
+
+    fa = ga.performance
+    fb = gb.performance
+
+    # TODO consider multi-objective
+    # check via objective values
+    if fa > fb
+        return false
+    elseif fa < fb
+        return true
+    end
+
+    # check time cost
+    if ga.time_eval > ga.time_eval
+        return false
+    end
+
+    true
 end
 
 function Base.show(io::IO, trial::GroupedTrial)
@@ -103,9 +140,9 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
 
     stats = [t.performance for t in trials]
     data = hcat(ids, parameters, stats, counter, pruned)
-    h = vcat("ID", ks, "Performance", "Success", "Pruned")
+    h = vcat("ID", ks, "Mean", "Success", "Pruned")
 
-    mask = sortperm(stats)
+    mask = sortperm(trials, lt = isbetter)
     data = data[mask, :]
 
     PrettyTables.pretty_table(io, data, header=h)
@@ -183,10 +220,11 @@ Base.@kwdef mutable struct StatusParami
     n_trials::Int = 0
     start_time::Float64 = time()
     stop::Bool = false
+    stop_reason::AbstractStop = NotOptimized()
 end
 
-export get_convergence
 history(status::StatusParami) = status.history
+
 function get_convergence(status::StatusParami, only_performance=true)
     hs = history(status)
     best = hs[1]
@@ -207,13 +245,15 @@ function trial_performance(trial::AbstractVector{<:Trial})
     if length(trial) == 1
         return first(get_fvals(trial)) 
     end
-    
+
+    # TODO improve this
+    return sts.mean(get_fvals(trial))
     
     # TODO improve this
-    v1 = length(trial) - count_success(trial)
-    v2 = sum(get_fvals(trial))
+    # v1 = length(trial) - count_success(trial)
+    # v2 = sum(get_fvals(trial))
 
-    100v1*(1 + abs(v2)) + v2
+    # 100v1*(1 + abs(v2)) + v2
 end
 
 function trial_performance(trial::GroupedTrial)
@@ -222,6 +262,7 @@ end
 
 count_success(trials::Vector{<:Trial}) = count(t.success for t in trials)
 count_success(trial::GroupedTrial) = count_success(trial.trials)
+allsucceeded(grouped::GroupedTrial) = length(grouped.trials) > 0 && count_success(grouped) == length(grouped.trials)
 
 function Base.show(io::IO, trial::Trial)
     if trial.pruned

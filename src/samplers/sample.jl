@@ -41,8 +41,8 @@ function sample(scenario::Scenario)
     end
 
     if counter == 0
-        # TODO add message for this stopping criteria
         scenario.status.stop = true
+        scenario.status.stop_reason = NoMoreTrials()
     end
     
 
