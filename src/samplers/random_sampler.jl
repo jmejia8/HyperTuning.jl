@@ -3,7 +3,7 @@ struct RandomSampler{R} <: AbstractSampler
     rng::R
 end
 
-function RandomSampler(;rng = default_rng_parami())
+function RandomSampler(;seed = 11497110100111109,rng = default_rng_parami(seed))
     RandomSampler(rng)
 end
 
