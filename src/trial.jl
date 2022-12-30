@@ -185,7 +185,19 @@ Base.@kwdef mutable struct StatusParami
     stop::Bool = false
 end
 
+export get_convergence
 history(status::StatusParami) = status.history
+function get_convergence(status::StatusParami, only_performance=true)
+    hs = history(status)
+    best = hs[1]
+    [
+     begin
+         best = best.performance >= h.performance ? h : best
+         only_performance ? (step, best.performance) : (step, best)
+     end
+     for (step, h) in enumerate(hs) if best.performance > h.performance
+    ]
+end
 
 function trial_performance(trial::AbstractVector{<:Trial})
     if isempty(trial)

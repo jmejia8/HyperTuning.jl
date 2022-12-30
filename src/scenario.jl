@@ -111,6 +111,7 @@ end
 
 
 history(scenario::Scenario) = history(scenario.status)
+get_convergence(scenario::Scenario) = get_convergence(scenario.status)
 
 function export_history(scenario::Scenario)
     # TODO
