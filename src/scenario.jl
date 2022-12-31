@@ -70,7 +70,7 @@ function Base.show(io::IO, scenario::Scenario)
 end
 
 function Scenario(;
-        parameters = MixedSpace(),
+        parameters = nothing,
         sampler    = default_sampler(),
         pruner     = default_pruner(),
         instances  = [1],
@@ -79,7 +79,15 @@ function Scenario(;
         max_time   = :auto,
         verbose    = false,
         batch_size = max(nprocs(), Sys.CPU_THREADS),
+        kargs...
     )
+    if !(parameters isa MixedSpace) 
+        # TODO update this for empty scenarios
+        isempty(kargs) && error("Provide parameters.")
+        _params = (k => kargs[k] for k in keys(kargs))
+        parameters = MixedSpace(_params...)
+    end
+    
     _sampler = Sampler(sampler, parameters)
 
     budget = suggest_budget(max_trials, max_evals, max_time, parameters, instances, _sampler)

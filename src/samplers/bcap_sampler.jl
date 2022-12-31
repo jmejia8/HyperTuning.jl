@@ -208,7 +208,8 @@ function report_values_to_sampler!(
         length(bcap.population) == population_size && _bca_update_mass!(bcap)
         return
     end
-    # delete elements in population
+    
+    # replace worst from old and new
     delete = sortperm(bcap.fitness)[population_size+1:end]
     sort!(delete)
     deleteat!(bcap.population, delete)

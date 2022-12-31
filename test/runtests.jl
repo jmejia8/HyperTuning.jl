@@ -24,6 +24,23 @@ const COMPLEX_PARAMETERS = parameters(
 const AVAILABLE_SAMPLERS = [RandomSampler(), BCAPSampler(), GridSampler()]
 const AVAILABLE_PRUNERS  = [NeverPrune(), MedianPruner(start_after=3, prune_after=5)]
 
+
+@testset verbose = true "Unitary" begin
+    @testset verbose = true "Scenario" begin
+        scenario = Scenario(
+                            a = Bounds(zeros(10), ones(10)),
+                            b = Bounds(zeros(Int,10), ones(Int, 10)),
+                            c = Permutations(4),
+                            d = BitArrays(6),
+                            x = (-1.0..1),
+                            y = (0..0),
+                            z = [:red, :green],
+                           )
+        @test rand(scenario.parameters) in scenario.parameters
+        # @unpack a, b, c, d, x, y, z = scenario
+    end
+end
+
 @testset verbose = true "API" begin
     function f(trial)
         @unpack a, b = trial
