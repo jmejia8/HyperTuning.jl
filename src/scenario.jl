@@ -125,6 +125,7 @@ history(scenario::Scenario) = history(scenario.status)
 get_convergence(scenario::Scenario) = get_convergence(scenario.status)
 allsucceeded(scenario::Scenario) = allsucceeded(scenario.best_trial)
 get_best_values(scenario::Scenario) = scenario.best_trial.values
+UnPack.unpack(scenario::Scenario, ::Val{k}) where {k} = best_trial(scenario).values[k]
 
 function export_history(scenario::Scenario)
     # TODO
