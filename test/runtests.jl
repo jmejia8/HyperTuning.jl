@@ -1,14 +1,14 @@
 using Test
-using Parami
+using HyperTuning
 
 
 # Aqua: Auto QUality Assurance for Julia packages
 using Aqua
 
 @testset "ambiguities" begin
-    Aqua.test_ambiguities(Parami, recursive = false)
+    Aqua.test_ambiguities(HyperTuning, recursive = false)
 end
-Aqua.test_all(Parami, ambiguities = false)
+Aqua.test_all(HyperTuning, ambiguities = false)
 
 
 const COMPLEX_PARAMETERS = parameters(
@@ -77,8 +77,8 @@ end
             @test scenario.pruner isa typeof(pruner)
             @test get_best_values(scenario) |> isempty
 
-            @test Parami.check_scenario(f, scenario, verbose=false)
-            Parami.optimize(f, scenario)
+            @test HyperTuning.check_scenario(f, scenario, verbose=false)
+            HyperTuning.optimize(f, scenario)
 
             # checks after optimization
             @test get_best_values(scenario) in COMPLEX_PARAMETERS

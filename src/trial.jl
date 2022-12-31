@@ -287,7 +287,7 @@ function get_fvals(trial::GroupedTrial)
     get_fvals(trial.trials)
 end
 
-Base.@kwdef mutable struct StatusParami
+Base.@kwdef mutable struct StatusHyperTuning
     history::Vector{GroupedTrial} = GroupedTrial[]
     f_evals::Int = 0
     n_trials::Int = 0
@@ -296,9 +296,9 @@ Base.@kwdef mutable struct StatusParami
     stop_reason::AbstractStop = NotOptimized()
 end
 
-history(status::StatusParami) = status.history
+history(status::StatusHyperTuning) = status.history
 
-function get_convergence(status::StatusParami, only_performance=true)
+function get_convergence(status::StatusHyperTuning, only_performance=true)
     hs = history(status)
     best = hs[1]
     [

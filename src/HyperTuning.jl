@@ -1,4 +1,4 @@
-module Parami
+module HyperTuning
 
 using Reexport
 

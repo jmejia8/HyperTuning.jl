@@ -17,7 +17,7 @@ mutable struct Scenario <: AbstractScenario
     instances::AbstractVector
     budget::Budget
     best_trial::GroupedTrial
-    status::StatusParami
+    status::StatusHyperTuning
     verbose::Bool
     batch_size::Int
 end
@@ -98,7 +98,7 @@ function Scenario(;
              instances,
              budget,
              GroupedTrial(Trial[]),
-             StatusParami(),
+             StatusHyperTuning(),
              verbose,
              batch_size,
             )
