@@ -65,9 +65,63 @@ function GroupedTrial(trials::Vector{T}) where T <: Trial
                  t)
 end
 
-function isbetter(ga::GroupedTrial, gb::GroupedTrial)
+function getobjectives(trial::GroupedTrial)
+    f1 = -count_success(trial)
+    f2 = trial.performance
+    f3 = trial.time_eval
+    f1, f2, f3
+end
 
-    # check successful instances
+function lexicographic_coparison(Fa::Tuple, Fb::Tuple)
+    for (a, b) in zip(Fa, Fb)
+        if a < b
+            return true
+        elseif a > b
+            return false
+        end
+    end
+    true
+end
+
+
+function compare(a::Tuple, b::Tuple)
+    k = length(a)
+    if k != length(b)
+        return 3
+    end
+
+    i = 1
+    while i <= k && a[i] == b[i]
+        i += 1
+    end
+
+    if i > k
+        return 0 # equals
+    end
+
+    if a[i] < b[i]
+        for j = i+1:k
+            if b[j] < a[j]
+                return 3 #a and b are incomparable
+            end
+        end
+        return 1 #  a dominates b
+    end
+
+    for j = i+1:k
+        if a[j] < b[j]
+            return 3 # a and b are incomparable
+        end
+    end
+
+    return 2 # b dominates a
+end
+
+
+function isbetter(ga::GroupedTrial, gb::GroupedTrial)
+    lexicographic_coparison(getobjectives(ga), getobjectives(gb))
+
+    #= check successful instances
     if count_success(ga) < count_success(gb)
         return false
     elseif count_success(ga) > count_success(gb)
@@ -91,6 +145,30 @@ function isbetter(ga::GroupedTrial, gb::GroupedTrial)
     end
 
     true
+    =#
+end
+
+
+function findtradeoffs(Fs)
+    mask = [1]
+    n = length(Fs)
+    for i in 2:n
+        j = 1
+        while j <= length(mask)
+            relation = compare(Fs[i], Fs[mask[j]])
+            if relation == 2 # j dominates i
+                break
+            elseif relation == 1 # i dominates j
+                deleteat!(mask, j)
+                continue
+            end
+            j += 1
+        end
+        if j > length(mask)
+            push!(mask, i)
+        end
+    end
+    return mask
 end
 
 function Base.show(io::IO, trial::GroupedTrial)
@@ -135,12 +213,14 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
     ks = collect(keys(first(trials).trials[1].values)) |> collect |> sort
     parameters = Any[t.trials[1].values[k] for t in trials, k in ks]
     ids = [t.id for t in trials]
-    counter = [t.count_success for t in trials]
+    nsuccess = [t.count_success for t in trials]
     pruned = [t.pruned for t in trials]
+    obj = length(first(trials).trials) > 1 ? "Mean" : "Objective"
+    ttime = [t.time_eval for t in trials] 
 
-    stats = [t.performance for t in trials]
-    data = hcat(ids, parameters, stats, counter, pruned)
-    h = vcat("ID", ks, "Mean", "Success", "Pruned")
+    means = [t.performance for t in trials]
+    data = hcat(ids, parameters, nsuccess, means, ttime, pruned)
+    h = vcat("ID", ks, "Success", obj, "Time", "Pruned")
 
     mask = sortperm(trials, lt = isbetter)
     data = data[mask, :]
@@ -162,26 +242,19 @@ function best_parameters(scenario)
     return scenario.best_trial
 end
 
-function top_parameters(scenario)
-    if isempty(scenario.status.history)
-        return GroupedTrial[]
-    end
-    
-    trials = sort(scenario.status.history, by = t -> t.performance)
-    v = first(trials).performance
-    ts = GroupedTrial[]
-    for trial in trials
-        if trial.performance != v
-            break
-        end
-        push!(ts, trial)
+function top_parameters(scenario; ignore_pruned=true)
+    if ignore_pruned
+        hs = [trial for trial in history(scenario) if !trial.pruned]
+    else
+        hs = history(scenario)
     end
 
-    if length(ts) == 1
-        return first(ts)
+    if isempty(hs)
+        return GroupedTrial[]
     end
-    
-    ts
+
+    mask = getobjectives.(hs) |> findtradeoffs
+    hs[mask]
 end
 
 

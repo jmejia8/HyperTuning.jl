@@ -24,7 +24,7 @@ end
 function _init_BCAPSampler!(bcap, searchspace, rng)
     _n = SearchSpaces.getdim(searchspace)
     # TODO: is 200 the best upper bound?
-    N = clamp(round(Int, sqrt(_n)*_n), 20, 200)
+    N = clamp(round(Int, sqrt(_n)*_n), 10, 200)
 
     bcap.population_size = N
     bcap

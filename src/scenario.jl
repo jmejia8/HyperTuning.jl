@@ -124,6 +124,7 @@ end
 history(scenario::Scenario) = history(scenario.status)
 get_convergence(scenario::Scenario) = get_convergence(scenario.status)
 allsucceeded(scenario::Scenario) = allsucceeded(scenario.best_trial)
+get_best_values(scenario::Scenario) = scenario.best_trial.values
 
 function export_history(scenario::Scenario)
     # TODO

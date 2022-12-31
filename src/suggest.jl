@@ -2,6 +2,10 @@ function _suggest(var::Symbol, ::Nothing, trial::Trial)
     return trial.values[var]
 end
 
+function _suggest(var::Symbol, ::Nothing, scenario::Scenario)
+    return scenario.best_trial.values[var]
+end
+
 #=
 function get_search_space(scenario::Scenario, key)
     scenario.parameters.domain[key]
