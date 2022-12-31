@@ -222,7 +222,7 @@ function trials_to_table(io, trials::Array{<:GroupedTrial})
     data = hcat(ids, parameters, nsuccess, means, ttime, pruned)
     h = vcat("ID", ks, "Success", obj, "Time", "Pruned")
 
-    mask = sortperm(trials, lt = isbetter)
+    mask = sortperm(trials, lt = isbetter, alg=InsertionSort)
     data = data[mask, :]
 
     PrettyTables.pretty_table(io, data, header=h)
