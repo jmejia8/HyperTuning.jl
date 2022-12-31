@@ -70,9 +70,27 @@ function _fix_candidate!(x, bounds::Bounds)
     x
 end
 
+function _mut_candidate!(x, bounds, rng)
+    η = 15
+    # polynomial mutation
+    D = length(x)
+    mask = rand(rng, D) .< min(0.1, 1/D)
+    for i in findall(mask)
+        r = rand(rng)
+        if r < 0.5
+            σ = (2r)^(1/(η + 1)) - 1
+        else
+            σ = 1 - (2 - 2r)^(1/(η + 1))
+        end
+        x[i] = x[i] + σ * bounds.Δ[i]
+    end
+    x
+end
+
 function _bcap_candidate_real(population, mass, bounds, rng)
     c, w = _center_worst(population, mass, rng)
     x = rand(rng, population) + 1.2rand(rng)*(c - w)
+    _mut_candidate!(x, bounds, rng)
     _fix_candidate!(x, bounds)
 end
 
