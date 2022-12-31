@@ -14,11 +14,16 @@ import UnPack: @unpack
 using Distributed
 
 export @unpack
-export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
+export @suggest, Scenario, parameters, get_instance, get_seed
 export best_parameters, top_parameters, report_success!, report_value!
-export should_prune,  RandomSampler, GridSampler, history
+export should_prune,   history
 export export_history, ..
 export get_convergence, get_best_values
+
+# pruners
+export NeverPrune, MedianPruner
+# samplers
+export RandomSampler, GridSampler, BCAPSampler
 
 include("stop.jl")
 include("pruners/pruners.jl")

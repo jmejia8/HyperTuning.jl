@@ -28,7 +28,7 @@ function check_scenario(f::Function, scenario::Scenario; verbose=true)
     end
     
     # TODO consider multi-objective
-    if !(fv isa Number)
+    if !trial.pruned && !(fv isa Number)
         @error "Parami: Objective function must report a numerical value (except for pruned trials)."
         println("Value reported: ", fv)
         return false

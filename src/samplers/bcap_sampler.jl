@@ -1,6 +1,5 @@
 abstract type PopulationBasedSampler <: AbstractRNGSampler end
 
-export BCAPSampler
 
 """
     BCAPSampler(searchspace;rng)
