@@ -9,8 +9,11 @@ import PrettyTables
 import Statistics as sts
 import Random
 import Printf: @printf
+import UnPack
+import UnPack: @unpack
 using Distributed
 
+export @unpack
 export @suggest, Scenario, parameters, MedianPruner, get_instance, get_seed
 export best_parameters, top_parameters, report_success!, report_value!
 export should_prune,  RandomSampler, GridSampler, history

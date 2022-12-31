@@ -333,6 +333,7 @@ function trial_performance(trial::GroupedTrial)
     trial.performance
 end
 
+UnPack.unpack(trial::Trial, ::Val{k}) where {k} = trial.values[k]
 count_success(trials::Vector{<:Trial}) = count(t.success for t in trials)
 count_success(trial::GroupedTrial) = count_success(trial.trials)
 allsucceeded(grouped::GroupedTrial) = length(grouped.trials) > 0 && count_success(grouped) == length(grouped.trials)

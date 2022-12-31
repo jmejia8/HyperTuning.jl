@@ -46,26 +46,34 @@ function _pre_proc(ex::Expr)
         return ex.args[1], ex.args[2]
     end
     =#
-    throw(ArgumentError)
+    error("Expression needs to be of form `x in trial`")
 end
 
 function _pre_proc(scenario::Symbol)
     return scenario, nothing
 end
 
-macro suggest(ex::Expr)
-    
-    if length(ex.args) != 3 || ex.args[1] ∉ [:in, :∈]
-        throw(ArgumentError("Expression not valid."))
-    end
-
-    var_name = ex.args[2]
-    _scenario, _searchspace = _pre_proc(ex.args[3])
-    
+function _exec_suggest(var_name::Symbol, _scenario::Symbol, _searchspace)
     quote
         local searchspace = $(esc(_searchspace))
         local scenario = $(esc(_scenario))
         local v = $(QuoteNode(var_name))
         $(esc(var_name)) = _suggest(v, searchspace, scenario)
     end
+end
+
+function _suggest_single(ex::Expr)
+    var_name = ex.args[2]
+    _scenario, _searchspace = _pre_proc(ex.args[3])
+    _exec_suggest(var_name, _scenario, _searchspace)
+    
+end
+
+macro suggest(ex::Expr)
+    if length(ex.args) == 3 && ex.args[1] ∈ [:in, :∈]
+        return _suggest_single(ex)
+    end
+
+    error("Expression needs to be of form `x in trial`")
+    
 end
