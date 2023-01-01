@@ -1,7 +1,3 @@
-```@meta
-CurrentModule = HyperTuning
-```
-
 # HyperTuning.jl
 
 Automated multi-instance hyperparameters optimization in Julia.
@@ -20,7 +16,7 @@ Let's begin `using HyperTuning` to optimize $f(x,y)=(1-x)^2+(y-1)^2$.
 After that, the hyperparameters and budget are given in a new scenario.
 Once the scenario and the objective function are defined, the optimization process begins. 
 
-```julia-repl
+```julia
 julia> using HyperTuning
 
 julia> function objective(trial)
