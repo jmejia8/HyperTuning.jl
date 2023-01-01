@@ -12,11 +12,34 @@ Base.@kwdef mutable struct Trial{I}
     _pruner::AbstractPruner = NeverPrune()
 end
 
+"""
+    get_instance(trial)
+
+Get instance problem which trials has to be evaluated.
+"""
 get_instance(trial::Trial) = trial.instance
+
 get_seed(trial::Trial) = trial.seed
+
+"""
+    report_success!(trial)
+
+Report that the trial successfully solved the instance.
+"""
 report_success!(trial::Trial) = (trial.success = true)
+
+"""
+    report_value!(trial, value)
+
+Report (to the pruner) evaluated value at trail.
+"""
 report_value!(trial::Trial, val) = push!(trial.record, val)
 
+"""
+    should_prune(trial)
+
+Check whether trial should be pruned.
+"""
 function should_prune(trial::Trial)
     step = length(trial.record)
     if step == 0
@@ -120,32 +143,6 @@ end
 
 function isbetter(ga::GroupedTrial, gb::GroupedTrial)
     lexicographic_coparison(getobjectives(ga), getobjectives(gb))
-
-    #= check successful instances
-    if count_success(ga) < count_success(gb)
-        return false
-    elseif count_success(ga) > count_success(gb)
-        return true
-    end
-
-    fa = ga.performance
-    fb = gb.performance
-
-    # TODO consider multi-objective
-    # check via objective values
-    if fa > fb
-        return false
-    elseif fa < fb
-        return true
-    end
-
-    # check time cost
-    if ga.time_eval > ga.time_eval
-        return false
-    end
-
-    true
-    =#
 end
 
 
@@ -238,10 +235,20 @@ function Base.show(io::IO, m::MIME"text/plain", trials::Array{<:GroupedTrial})
     trials_to_table(io, trials)
 end
 
+"""
+    best_parameters(scenario)
+
+Return best parameters saved in scenario.
+"""
 function best_parameters(scenario)
     return scenario.best_trial
 end
 
+"""
+    top_parameters(scenario; ignore_pruned)
+
+Return an array of trade-off trials (regarding success, mean objective value, time, etc).
+"""
 function top_parameters(scenario; ignore_pruned=true)
     if ignore_pruned
         hs = [trial for trial in history(scenario) if !trial.pruned]
@@ -287,6 +294,11 @@ function get_fvals(trial::GroupedTrial)
     get_fvals(trial.trials)
 end
 
+"""
+    StatusHyperTuning
+
+Current status of the optimize process for scenario.
+"""
 Base.@kwdef mutable struct StatusHyperTuning
     history::Vector{GroupedTrial} = GroupedTrial[]
     f_evals::Int = 0
@@ -322,11 +334,6 @@ function trial_performance(trial::AbstractVector{<:Trial})
     # TODO improve this
     return sts.mean(get_fvals(trial))
     
-    # TODO improve this
-    # v1 = length(trial) - count_success(trial)
-    # v2 = sum(get_fvals(trial))
-
-    # 100v1*(1 + abs(v2)) + v2
 end
 
 function trial_performance(trial::GroupedTrial)

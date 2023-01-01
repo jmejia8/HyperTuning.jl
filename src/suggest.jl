@@ -69,6 +69,11 @@ function _suggest_single(ex::Expr)
     
 end
 
+"""
+    @suggest x in trial
+
+Return a value for x stored in the sampled trial.
+"""
 macro suggest(ex::Expr)
     if length(ex.args) == 3 && ex.args[1] ∈ [:in, :∈]
         return _suggest_single(ex)

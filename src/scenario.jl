@@ -1,6 +1,11 @@
 abstract type AbstractScenario end
 
-default_rng_parami(seed=1223334444) = Random.Xoshiro(seed)
+"""
+    default_rng_ht(seed)
+
+Default random number generator in HyperTuning.
+"""
+default_rng_ht(seed=1223334444) = Random.Xoshiro(seed)
 default_sampler() = BCAPSampler()
 default_pruner() = NeverPrune()
 
@@ -69,6 +74,31 @@ function Base.show(io::IO, scenario::Scenario)
     end
 end
 
+"""
+    Scenario(;
+            parameters...,
+            sampler    = default_sampler(),
+            pruner     = default_pruner(),
+            instances  = [1],
+            max_trials = :auto,
+            max_evals  = :auto,
+            max_time   = :auto,
+            verbose    = false,
+            batch_size = max(nprocs(), Sys.CPU_THREADS),
+        )
+
+Define an Scenario with parameters, and budget.
+
+
+- `sampler` sampler to be used.
+- `pruner` pruner to reduce computational cost.
+- `instances` array (iterator) containing the problem instances.
+- `max_trials` maximum number of trials to be evaluated on [`optimize`](@ref).
+- `max_evals` maximum number of function evaluations.
+- `max_time` maximum execution time on [`optimize`](@ref).
+- `verbose` show message during the optimization.
+- `batch_size` number of trials evaluated for each instance for each iteration.
+"""
 function Scenario(;
         parameters = nothing,
         sampler    = default_sampler(),
@@ -104,7 +134,12 @@ function Scenario(;
             )
 end
 
+"""
+    save_trials!(ungrouped_trials, scenario)
 
+Save evaluated trials into scenario history, then update best trial found so far.
+Also, report values to the sampler.
+"""
 function save_trials!(ungrouped_trials::Vector{<:Trial}, scenario::Scenario)
     status = scenario.status
     trials = group_trials_by_instance(ungrouped_trials, scenario.instances)
@@ -113,6 +148,11 @@ function save_trials!(ungrouped_trials::Vector{<:Trial}, scenario::Scenario)
     report_values_to_sampler!(scenario.sampler, trials)
 end
 
+"""
+    update_best_trial!(scenario, trials)
+
+Update best trial found so far.
+"""
 function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
     if isempty(trials)
         return scenario
@@ -129,7 +169,18 @@ function update_best_trial!(scenario::Scenario, trials::Vector{GroupedTrial})
 end
 
 
+"""
+    history(scenario)
+
+Return all evaluated trails.
+"""
 history(scenario::Scenario) = history(scenario.status)
+
+"""
+    get_convergence(scenario)
+
+Return vector of tuples containing the trial id and objective value.
+"""
 get_convergence(scenario::Scenario) = get_convergence(scenario.status)
 allsucceeded(scenario::Scenario) = allsucceeded(scenario.best_trial)
 get_best_values(scenario::Scenario) = best_parameters(scenario).values

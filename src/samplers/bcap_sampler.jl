@@ -1,11 +1,6 @@
 abstract type PopulationBasedSampler <: AbstractRNGSampler end
 
 
-"""
-    BCAPSampler(searchspace;rng)
-
-Define a random iterator for the search space.
-"""
 mutable struct BCAPSampler{R} <: PopulationBasedSampler
     rng::R
     population::Array
@@ -14,7 +9,12 @@ mutable struct BCAPSampler{R} <: PopulationBasedSampler
     population_size::Int
 end
 
-BCAPSampler(;seed = 989997112, rng=default_rng_parami(seed), population_size=0) = BCAPSampler(rng, [], zeros(0), zeros(0), population_size)
+"""
+    BCAPSampler(searchspace;rng)
+
+Define a iterator for the BCAP sampler.
+"""
+BCAPSampler(;seed = 989997112, rng=default_rng_ht(seed), population_size=0) = BCAPSampler(rng, [], zeros(0), zeros(0), population_size)
 
 function Sampler(s::BCAPSampler, parameters::MixedSpace)
     BCAPSampler(parameters;rng=s.rng, population_size=s.population_size)
@@ -32,7 +32,7 @@ end
 function BCAPSampler(
         searchspace::AtomicSearchSpace;
         seed = 989997112,
-        rng=default_rng_parami(seed),
+        rng=default_rng_ht(seed),
         population_size = 0,
     )
     _init_BCAPSampler!(BCAPSampler(;rng, population_size), searchspace, rng)
@@ -41,7 +41,7 @@ end
 
 function BCAPSampler(searchspace::MixedSpace;
         seed = 989997112,
-        rng=default_rng_parami(seed),
+        rng=default_rng_ht(seed),
         population_size = 0,
     )
     ss = Dict(k => Sampler(BCAPSampler(searchspace.domain[k]; rng, population_size), searchspace.domain[k]) for k in keys(searchspace.domain))
@@ -50,7 +50,7 @@ end
 
 function BCAPSampler(searchspace::AtomicSearchSpace;
         seed = 989997112,
-        rng=default_rng_parami(seed),
+        rng=default_rng_ht(seed),
         population_size=0)
     Sampler(BCAPSampler(;rng, population_size), searchspace)
 end

@@ -11,6 +11,16 @@ function after_evaluation!(scenario::Scenario)
     scenario
 end
 
+"""
+    optimize!(f, scenario)
+
+Perform an iteration of the optimization process.
+
+When this function is called, `scenario.batch_size` trials are sampled and evaluated,
+then update the sampler and pruner.
+
+See also [`optimize`](@ref)
+"""
 function optimize!(f::Function, scenario::Scenario)
     # prepare some required stuff
     before_evaluation!(scenario)
@@ -23,6 +33,15 @@ function optimize!(f::Function, scenario::Scenario)
 end
 
 
+"""
+    optimize(f, scenario)
+
+Optimize f on provided scenario while the budget is not exceeded
+(limited by max_trials, max_evals, etc).
+
+
+See also [`optimize!`](@ref)
+"""
 function optimize(f::Function, scenario::Scenario)
     while !default_stop_criteria(scenario)
         optimize!(f, scenario)
@@ -30,7 +49,11 @@ function optimize(f::Function, scenario::Scenario)
     scenario
 end
 
+"""
+    budget_exceeded(scenario)
 
+Check whether if budget is not exceeded.
+"""
 function budget_exceeded(scenario::Scenario)
     status = scenario.status
     if scenario.status.stop
@@ -49,7 +72,13 @@ function budget_exceeded(scenario::Scenario)
     status.stop
 end
 
+"""
+    all_instances_succeeded(scenario)
 
+Check if all instances are successfully solved.
+
+See also [`report_success`](@ref)
+"""
 function all_instances_succeeded(scenario::Scenario)
     status = scenario.status
     if scenario.status.stop
