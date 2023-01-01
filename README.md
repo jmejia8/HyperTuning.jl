@@ -1,9 +1,9 @@
 # HyperTuning.jl
 
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
-[![Optimized using HyperTuning](https://raw.githubusercontent.com/jmejia8/HyperTuning.jl/main/badge.svg)](https://github.com/jmejia8/HyperTuning.jl)
 
-Automated multi-instance hyperparameters optimization in Julia.
+Automated hyperparameter tuning in Julia.
+HyperTuning aims to be intuitive, capable of handling multiple problem instances, and providing easy parallelization.
 
 ## Installation
 
