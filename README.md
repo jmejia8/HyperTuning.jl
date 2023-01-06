@@ -7,10 +7,19 @@ HyperTuning aims to be intuitive, capable of handling multiple problem instances
 
 ## Installation
 
-This package can be installed on Julia v1.7 and above.
+This package can be installed on Julia v1.7 and above. Use one of the following options.
+
+Via Pkg module:
+
+```julia
+julia> import Pkg; Pkg.add("HyperTuning")
+```
+
+
+Via the Julia package manager, type `]` and
 
 ```
-pkg> add https://github.com/jmejia8/HyperTuning.jl
+pkg> add HyperTuning
 ```
 
 ## Quick Start
@@ -58,6 +67,8 @@ Scenario: evaluated 200 trials.
 julia> @unpack x, y = scenario
 ```
 
+See [here](https://github.com/jmejia8/hypertuning-examples) for more examples.
+
 ## Features
 
 - **Intuitive usage**: Define easily the objective function, the hyperparameters, start optimization, and nothing more.
@@ -66,6 +77,10 @@ julia> @unpack x, y = scenario
 - **Parameters**: This package is compatible with integer, float, boolean, and categorical parameters; however permutations and vectors of numerical values are compatible.
 - **Samplers**: `BCAPSampler` for a heuristic search, `GridSampler` for brute force, and `RandomSampler` for an unbiased search.
 - **Pruner**: `NeverPrune` to never prune a trial and `MedianPruner` for early-stopping the algorithm being configured.
+
+## Examples
+
+Further examples can be found at [https://github.com/jmejia8/hypertuning-examples](https://github.com/jmejia8/hypertuning-examples)
 
 ## Citation
 
