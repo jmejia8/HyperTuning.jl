@@ -75,7 +75,7 @@ function GroupedTrial(trials::Vector{T}) where T <: Trial
     end
     performance = trial_performance(trials)
     counter = count_success(trials)
-    pruned  = any(t.pruned for t in trials)
+    pruned  = all(t.pruned for t in trials)
     values = first(trials).values
     value_id = first(trials).value_id
     t = sum(trial.time_eval for trial in trials)
