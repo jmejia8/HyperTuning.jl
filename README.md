@@ -1,9 +1,26 @@
+
+
+<img align="right" src="https://jmejia8.github.io/HyperTuning.jl/dev/assets/logo.svg" width=300  alt="HyperTuning.jl logo"/>
+
 # HyperTuning.jl
 
-[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[Installation](#installation) /
+[Quick Start](#quick-start) /
+[Features](#features) /
+[Examples](#examples) /
+[Documentation](https://jmejia8.github.io/HyperTuning.jl/dev/)
+
+
 
 Automated hyperparameter tuning in Julia.
 HyperTuning aims to be intuitive, capable of handling multiple problem instances, and providing easy parallelization.
+
+
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Doc](https://img.shields.io/badge/docs-dev-blue.svg)](https://jmejia8.github.io/HyperTuning.jl/dev/)
+
+
+<hr>
 
 ## Installation
 
