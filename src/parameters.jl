@@ -12,7 +12,7 @@ end
 
 Define a interval between a and b (inclusive).
 
-See also [`Bounds`](@ref)
+See also [`BoxConstrainedSpace`](@ref)
 """
-..(a::Real, b::Real) = Bounds(a, b)
-..(a::Bool, b::Bool) = BitArrays(1)
+..(a::Real, b::Real) = BoxConstrainedSpace(a, b)
+..(a::Bool, b::Bool) = BitArraySpace(1)

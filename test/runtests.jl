@@ -14,9 +14,9 @@ Aqua.test_all(HyperTuning, ambiguities = false)
 const COMPLEX_PARAMETERS = parameters(
                                       :a => (60.0 .. 200.0),
                                       :b => (1 .. 5),
-                                      :x => Bounds([-1,-1.0], [1.0, 1.0]),
-                                      :y => Bounds([2, 3, 4], [10, 20, 30]),
-                                      :w => BitArrays(3),
+                                      :x => BoxConstrainedSpace([-1,-1.0], [1.0, 1.0]),
+                                      :y => BoxConstrainedSpace([2, 3, 4], [10, 20, 30]),
+                                      :w => BitArraySpace(3),
                                       :N => 0:10,
                                       :fn => [sin, cos, abs],
                                      )
@@ -28,10 +28,10 @@ const AVAILABLE_PRUNERS  = [NeverPrune(), MedianPruner(start_after=3, prune_afte
 @testset verbose = true "Unitary" begin
     @testset verbose = true "Scenario" begin
         scenario = Scenario(
-                            a = Bounds(zeros(10), ones(10)),
-                            b = Bounds(zeros(Int,10), ones(Int, 10)),
-                            c = Permutations(4),
-                            d = BitArrays(6),
+                            a = BoxConstrainedSpace(zeros(10), ones(10)),
+                            b = BoxConstrainedSpace(zeros(Int,10), ones(Int, 10)),
+                            c = PermutationSpace(4),
+                            d = BitArraySpace(6),
                             x = (-1.0..1),
                             y = (0..0),
                             z = [:red, :green],

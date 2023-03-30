@@ -12,10 +12,20 @@ HyperTuning aims to be intuitive, capable of handling multiple problem instances
 
 ## Installation
 
-This package can be installed on Julia v1.7 and above.
+
+This package can be installed on Julia v1.7 and above. Use one of the following options.
+
+Via Pkg module:
+
+```julia
+julia> import Pkg; Pkg.add("HyperTuning")
+```
+
+
+Via the Julia package manager, type `]` and
 
 ```
-pkg> add https://github.com/jmejia8/HyperTuning.jl
+pkg> add HyperTuning
 ```
 
 ## Quick Start

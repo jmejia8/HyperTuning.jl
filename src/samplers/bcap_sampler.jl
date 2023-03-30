@@ -62,7 +62,7 @@ function _center_worst(population, mass, rng)
     sum(population[mask] .* m), population[argmin(m)]
 end
 
-function _fix_candidate!(x, bounds::Bounds)
+function _fix_candidate!(x, bounds::BoxConstrainedSpace)
     mask = x .< bounds.lb
     x[mask] = bounds.lb[mask]
     mask = x .> bounds.ub
@@ -94,19 +94,19 @@ function _bcap_candidate_real(population, mass, bounds, rng)
     _fix_candidate!(x, bounds)
 end
 
-function _bcap_candidate(population, mass, bounds::Bounds, rng)
+function _bcap_candidate(population, mass, bounds::BoxConstrainedSpace, rng)
     _bcap_candidate_real(population, mass, bounds, rng)
 end
 
-function _bcap_candidate(population, mass, bounds::Bounds{T}, rng) where T <: Integer
+function _bcap_candidate(population, mass, bounds::BoxConstrainedSpace{T}, rng) where T <: Integer
     x = _bcap_candidate_real(population, mass, bounds, rng)
     round.(T, x)
 end
 
 
-function _bcap_candidate(population, mass, booleans::BitArrays, rng) 
+function _bcap_candidate(population, mass, booleans::BitArraySpace, rng) 
     d = SearchSpaces.getdim(booleans)
-    bounds = Bounds(zeros(d), ones(d))
+    bounds = BoxConstrainedSpace(zeros(d), ones(d))
     x = _bcap_candidate_real(population, mass, bounds, rng)
     x .< 0.5
 end
@@ -117,7 +117,7 @@ end
 
 function SearchSpaces.value(
         sampler::Sampler{S, B}
-    ) where {S<:BCAPSampler, B<:Union{Bounds, BitArrays}}
+    ) where {S<:BCAPSampler, B<:Union{BoxConstrainedSpace, BitArraySpace}}
     bcap = sampler.method
     population = bcap.population
     searchspace = sampler.searchspace
@@ -134,7 +134,7 @@ end
 
 function SearchSpaces.value(
         sampler::Sampler{S, B}
-    ) where {S<:BCAPSampler, B<:Permutations}
+    ) where {S<:BCAPSampler, B<:PermutationSpace}
 
     bcap = sampler.method
     population = bcap.population
