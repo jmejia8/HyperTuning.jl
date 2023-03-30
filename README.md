@@ -97,6 +97,15 @@ See [here](https://github.com/jmejia8/hypertuning-examples) for more examples.
 
 ## Examples
 
+Examples for different Julia packages.
+
+- Optimization
+    * [Metaheuristics](https://github.com/jmejia8/hypertuning-examples/blob/main/Metaheuristics/metaheuristics.jl): The best parameters for a metaheuristic.
+    * [Optim](https://github.com/jmejia8/hypertuning-examples/blob/main/Optim/optim.jl): The best parameter for an exact optimizer.
+- Machine Learning
+    * [MLJ](https://github.com/jmejia8/hypertuning-examples/blob/main/MLJ/mlj.jl): The best hyperparameters for a Machine Learning method.
+    * [Flux](https://github.com/jmejia8/hypertuning-examples/blob/main/Flux/flux.jl): The best hyperparameters for an artificial neural network method.
+
 Further examples can be found at [https://github.com/jmejia8/hypertuning-examples](https://github.com/jmejia8/hypertuning-examples)
 
 ## Citation
