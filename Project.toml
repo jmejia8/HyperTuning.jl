@@ -1,7 +1,7 @@
 name = "HyperTuning"
 uuid = "ddfa78db-9111-4329-a6bd-d4ed85ceb229"
 authors = ["Jesus Mejia <jesusmejded@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"

@@ -48,13 +48,6 @@ function BCAPSampler(searchspace::MixedSpace;
     Sampler(ss, searchspace, cardinality(searchspace))
 end
 
-function BCAPSampler(searchspace::AtomicSearchSpace;
-        seed = 989997112,
-        rng=default_rng_ht(seed),
-        population_size=0)
-    Sampler(BCAPSampler(;rng, population_size), searchspace)
-end
-
 function _center_worst(population, mass, rng)
     mask = rand(rng, eachindex(population), 3)
     m = mass[mask]
