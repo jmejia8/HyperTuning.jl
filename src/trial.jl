@@ -46,10 +46,14 @@ function should_prune(trial::Trial)
         return false
     end
 
-    val = last(trial.record)
-    instance_id = trial.instance_id
-
-    pruned = should_prune(trial._pruner, step, instance_id, val)
+    pruner = trial._pruner
+    pruned = if hasmethod(should_prune, Tuple{typeof(pruner), typeof(trial)})
+        should_prune(pruner, trial)
+    else
+        val = last(trial.record)
+        instance_id = trial.instance_id
+        should_prune(pruner, step, instance_id, val)
+    end
     trial.pruned = pruned
     pruned
 end
@@ -369,4 +373,3 @@ function print_trial(trial::Trial)
         printstyled(m, " Trial ", trial.value_id, ": ", p, " evaluated ", trial.fval, " at instance ", trial.instance_id, "\n", color = c)
     end
 end
-
