@@ -21,7 +21,7 @@ export export_history, ..
 export get_convergence, get_best_values
 
 # pruners
-export NeverPrune, MedianPruner
+export NeverPrune, MedianPruner, WilcoxonPruner
 # samplers
 export RandomSampler, GridSampler, BCAPSampler
 

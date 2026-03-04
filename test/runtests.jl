@@ -22,7 +22,7 @@ const COMPLEX_PARAMETERS = parameters(
                                      )
 
 const AVAILABLE_SAMPLERS = [RandomSampler(), BCAPSampler(), GridSampler()]
-const AVAILABLE_PRUNERS  = [NeverPrune(), MedianPruner(start_after=3, prune_after=5)]
+const AVAILABLE_PRUNERS  = [NeverPrune(), MedianPruner(start_after=3, prune_after=5), WilcoxonPruner(p_value=0.05, start_after=5)]
 
 
 @testset verbose = true "Unitary" begin
